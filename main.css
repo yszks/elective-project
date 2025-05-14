@@ -1,0 +1,158 @@
+:root {
+    --bg-color: #0C0C0C;
+    --text-color: #ffffff;
+}
+
+@font-face {
+    font-family: 'cool';
+    src: url('assets/fonts/Coolvetica Rg.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Lemon';
+    src: url('assets/fonts/LEMONMILK-Bold.otf') format('opentype');
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+body.light-theme {
+    --bg-color: #ffffff;
+    --text-color: #0C0C0C;
+}
+
+#theme-toggle {
+    width: 49px;
+    height: 49px;
+    border: none;
+    cursor: pointer;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: transparent;
+    border: 2px, solid, #203A49;
+}
+
+#theme-toggle::after {
+    content: "";
+    display: block;
+    background-image: url('assets/images/moon.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-left: -14px;
+    margin-top: -5px;
+    width: 35px;
+    height: 35px;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+body.light-theme #theme-toggle::after {
+    content: "";
+    display: block;
+    background-image: url('assets/images/sun.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-left: -17px;
+    margin-top: -7.5px;
+    width: 40px;
+    height: 40px;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.title {
+    margin-top: -25px;
+    margin-bottom: -25px;
+    justify-self: center;
+}
+
+.container {
+    justify-self: center;
+}
+
+#join-btn {
+    position: relative;
+    margin-top: 50px;
+    font-size: 18px;
+    padding: 20px 40px;
+}
+
+#mic-btn {
+    width: 40px;
+    height: 40px;
+}
+
+#camera-btn {
+    width: 40px;
+    height: 40px;
+}
+
+.camera-icon {
+    margin-left: -12px;
+    margin-top: -6px;
+    width: 26px;
+    height: 31px;
+}
+
+.mic-icon {
+    margin-left: -11px;
+    margin-top: -2px;
+    width: 23px;
+    height: auto;
+}
+
+button {
+    border: none;
+    background-color: #242424;
+    border-radius: 10px;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 2px;
+    cursor: pointer;
+    font-family: 'Coolvetica';
+}
+
+#video-streams {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    height: 500px;
+    width: 1400px;
+    margin: 0 auto;
+}
+
+.speaking {
+    border: 3px solid limegreen !important;
+}
+
+.video-container {
+    height: 500px; /* or whatever you want */
+    overflow: hidden;
+    border-radius: 10px;
+    position: relative;
+    border: 3px solid black;
+    
+}
+
+.video-player {
+    height: 100%;
+    width: 100%;
+    object-fit: cover; 
+}
+
+#stream-controls {
+    display: none;
+    justify-content: center;
+    margin-top: 0.5em;
+}
+
+@media screen and (max-width:1400px) {
+    #video-streams {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        width: auto;
+    }
+}
