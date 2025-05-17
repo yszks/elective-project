@@ -130,7 +130,7 @@ button {
 }
 
 .video-container {
-    height: 500px; /* or whatever you want */
+    height: 250px; /* or whatever you want */
     overflow: hidden;
     border-radius: 10px;
     position: relative;
@@ -145,14 +145,17 @@ button {
 }
 
 #stream-controls {
-    display: none;
     justify-content: center;
-    position: relative;
+    display: block;
+    position: sticky;
 }
 
 @media screen and (max-width:1400px) {
     #video-streams {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, 1fr);
         width: auto;
+        gap: 10px;
     }
 }
