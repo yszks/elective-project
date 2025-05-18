@@ -183,7 +183,8 @@ let toggleCamera = async (e) => {
 
 
 
-document.getElementById('join-btn').addEventListener('click', joinStream)
+document.getElementById('join-btn').addEventListener('click', joinStream);
+document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('join-btn').style.display = 'none' });
 document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('title').style.display = 'none' });
 document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('logo-left').style.display = 'block' });
 document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('stream-controls').style.display = 'flex' });

@@ -10,42 +10,49 @@
 </head>
 
 <body>
-    <div id="title">
-        <img id="theme-image" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="400px" height="auto">
+    <div id="page-wrapper">
+        <div id="main-content">
+            <div id="title">
+                <img id="theme-image" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="500px"
+                    height="auto">
+            </div>
+
+            <div id="logo-left">
+                <img id="logogogo" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="200px" height="auto">
+            </div>
+
+            <button id="theme-toggle"></button>
+
+            <div class="container-join-btn">
+                <button id="join-btn">Join Room1</button>
+            </div>
+
+
+            <div class="vid-main-cont">
+                <div id="stream-wrapper">
+                    <div id="video-streams"></div>
+                </div>
+            </div>
+
+
+            <div id="stream-controls">
+                <button id="leave-btn">Leave Room</button>
+                <button id="mic-btn" style="background-color: #FF8578;">
+                    <img src="assets/images/mic-off.png" alt="Mic Off"
+                        style="margin-left: -11px; margin-top: -2px; width: 23px; height: auto; pointer-events: none;">
+                </button>
+                <button id="camera-btn" style="background-color: #A1FF99;">
+                    <img src="assets/images/camera-on.png" alt="Camera Off"
+                        style="margin-left: -12px; margin-top: -6px; width: 26px; height: 31px; pointer-events: none;">
+                </button>
+            </div>
+        </div>
+
+
+        <footer style="text-align: left;">
+            <p>&copy; 2025 iBulong. All rights reserved.</p>
+        </footer>
     </div>
-
-    <div id="logo-left">
-        <img id="logogogo" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="200px" height="auto">
-    </div>
-
-    <button id="theme-toggle"></button>
-
-    <div class="container-join-btn">
-        <button id="join-btn">Join Room1</button>
-    </div>
-    
-
-    
-    <div id="stream-wrapper">
-        <div id="video-streams"></div>
-    </div>
-
-    <div id="stream-controls">
-        <button id="leave-btn">Leave Room</button>
-        <button id="mic-btn" style="background-color: #FF8578;">
-            <img src="assets/images/mic-off.png" alt="Mic Off"
-                style="margin-left: -11px; margin-top: -2px; width: 23px; height: auto; pointer-events: none;">
-        </button>
-        <button id="camera-btn" style="background-color: #A1FF99;">
-            <img src="assets/images/camera-on.png" alt="Camera Off"
-                style="margin-left: -12px; margin-top: -6px; width: 26px; height: 31px; pointer-events: none;">
-        </button>
-    </div>
-
-    <footer style="justify-self: center;">
-        <p>&copy; 2025 iBulong. All rights reserved.</p>
-    </footer>
-
     <script src="AgoraRTC_N-4.23.3.js" defer></script>
     <script src="https://cdn.agora.io/sdk/release/AgoraRTM.min.js" defer></script>
     <script src="main.js" defer></script>

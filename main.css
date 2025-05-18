@@ -13,6 +13,22 @@
     src: url('assets/fonts/LEMONMILK-Bold.otf') format('opentype');
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+#page-wrapper {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#main-content {
+    flex: 1;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -30,7 +46,7 @@ body.light-theme {
     cursor: pointer;
     position: fixed;
     top: 10px;
-    right: 10px;
+    right: 25px;
     background-color: transparent;
     border: 3px solid #203A49;
     z-index: 1000;
@@ -65,14 +81,13 @@ body.light-theme #theme-toggle::after {
 }
 
 #title {
-    margin-top: -15px;
     margin-bottom: -5px;
     justify-self: center;
 }
 
 #logo-left {
     display: none;
-    margin-top: -15px;
+    margin-top: -5px;
     margin-bottom: -5px;
     justify-self: left;
 }
@@ -138,9 +153,13 @@ button {
     height: auto;
 }
 
+.vid-main-cont{
+    padding: 0px 20px;
+}
+
 .video-container {
     position: relative;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
     width: 100%;
     border-radius: 10px;
     border: 3px solid black;
