@@ -31,7 +31,5 @@ window.onload = () => {
         document.getElementById('theme-toggle').style.backgroundColor = '#ffffff'; 
     }
     else
-        themeImage.src = 'assets/images/roomzy-logo-dark.png';
-        logo.src = 'assets/images/roomzy-logo-dark.png';
         document.getElementById('theme-toggle').style.backgroundColor = '#0C0C0C'; 
 }
