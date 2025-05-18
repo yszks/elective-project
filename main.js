@@ -16,7 +16,7 @@ let joinAndDisplayLocalStream = async () => {
     UID = await client.join(APP_ID, CHANNEL, TOKEN, null);
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks({
         audio: {
-            echoCancellation: false,
+            echoCancellation: true,
             noiseSuppression: true,
             autoGainControl: true,
         },
@@ -87,13 +87,13 @@ let handleUserJoined = async (user, mediaType) => {
         }
 
         player = `<div class="video-container" id="user-container-${user.uid}">
-                  <div class="video-player" id="user-${user.uid}"></div>
-              </div>`;
+                    <div class="video-player" id="user-${user.uid}"></div>
+                    </div>`;
         document.getElementById('video-streams').insertAdjacentHTML('beforeend', player);
 
         user.videoTrack.play(`user-${user.uid}`);
 
-        //Mirror the remote user's video
+        //Mirror video
         document.getElementById(`user-${user.uid}`).style.transform = 'scaleX(-1)';
     }
 
@@ -141,6 +141,7 @@ let toggleMic = async (e) => {
                  class="mic-icon">
         `;
         button.style.backgroundColor = '#242424';
+        document.getElementById('mute-icon').style.display = 'none'
     } else {
         await micTrack.setMuted(true);
         console.log("Mic muted");
@@ -150,6 +151,7 @@ let toggleMic = async (e) => {
                  class="mic-icon">
         `;
         button.style.backgroundColor = '#FF8578';
+        document.getElementById('mute-icon').style.display = 'flex'
     }
 };
 
@@ -179,7 +181,13 @@ let toggleCamera = async (e) => {
     }
 };
 
+
+
 document.getElementById('join-btn').addEventListener('click', joinStream)
+document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('title').style.display = 'none' });
+document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('logo-left').style.display = 'block' });
+document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('stream-controls').style.display = 'flex' });
+
 document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream)
 document.getElementById('mic-btn').addEventListener('click', toggleMic)
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);

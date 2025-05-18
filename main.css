@@ -25,15 +25,15 @@ body.light-theme {
 }
 
 #theme-toggle {
-    width: 49px;
-    height: 49px;
-    border: none;
+    width: 40px;
+    height: 43px;
     cursor: pointer;
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 10px;
+    right: 10px;
     background-color: transparent;
-    border: 2px, solid, #203A49;
+    border: 3px solid #203A49;
+    z-index: 1000;
 }
 
 #theme-toggle::after {
@@ -43,10 +43,10 @@ body.light-theme {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    margin-left: -14px;
-    margin-top: -5px;
-    width: 35px;
-    height: 35px;
+    margin-left: -15px;
+    margin-top: -6px;
+    width: 30px;
+    height: 30px;
     transition: background-color 0.4s ease, color 0.4s ease;
 }
 
@@ -57,20 +57,27 @@ body.light-theme #theme-toggle::after {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    margin-left: -17px;
-    margin-top: -7.5px;
-    width: 40px;
-    height: 40px;
+    margin-left: -16px;
+    margin-top: -8px;
+    width: 33px;
+    height: 33px;
     transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-.title {
-    margin-top: -25px;
-    margin-bottom: -25px;
+#title {
+    margin-top: -15px;
+    margin-bottom: -5px;
     justify-self: center;
 }
 
-.container {
+#logo-left {
+    display: none;
+    margin-top: -15px;
+    margin-bottom: -5px;
+    justify-self: left;
+}
+
+.container-join-btn {
     justify-self: center;
 }
 
@@ -117,45 +124,59 @@ button {
     font-family: 'Coolvetica';
 }
 
-#video-streams {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    height: 500px;
-    width: 1400px;
-    margin: 0 auto;
-}
-
 .speaking {
     border: 3px solid limegreen !important;
 }
 
+#mute-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    pointer-events: none;
+    width: 100px;
+    height: auto;
+}
+
 .video-container {
-    height: 250px; /* or whatever you want */
-    overflow: hidden;
-    border-radius: 10px;
     position: relative;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    border-radius: 10px;
     border: 3px solid black;
-    
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .video-player {
     height: 100%;
     width: 100%;
-    object-fit: cover; 
+    object-fit: cover;
 }
 
 #stream-controls {
+    display: none;
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0C0C0C;
+    border-radius: 10px;
+    padding: 5px;
     justify-content: center;
-    display: block;
-    position: sticky;
+    align-items: center;
+    z-index: 1000;
 }
 
-@media screen and (max-width:1400px) {
+@media screen and (min-width:300px) {
     #video-streams {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        grid-template-rows: repeat(5, 1fr);
-        width: auto;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 10px;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
     }
 }
