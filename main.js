@@ -1,5 +1,5 @@
 const APP_ID = "384b88429f6c4934bd13dae2a9c2a5ab"
-const TOKEN = "007eJxTYFhx/9+BOTvnPdHerHDezdLTYmOmpLPyrMXby2r/b334hGW/AoOxhUmShYWJkWWaWbKJpbFJUoqhcUpiqlGiZbJRomli0ot+rYyGQEaGZUENrIwMEAjiczCk5qQml2SWpTIwAACNeCNe"
+const TOKEN = "007eJxTYHArLioMPZt17OwDqx9cdxiUJS5PDnedzeVds7r7/b9bqrsUGIwtTJIsLEyMLNPMkk0sjU2SUgyNUxJTjRItk40STROTmnh0MhoCGRk4fIJZGRkgEMxnSM1JTS7JLEtlYAAAyO0gOQ=="
 const CHANNEL = "elective"
 
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' })
@@ -74,6 +74,7 @@ let joinStream = async () => {
     await joinAndDisplayLocalStream()
     document.getElementById('join-btn').style.display = 'none'
     document.getElementById('stream-controls').style.display = 'flex'
+    document.getElementById('container-chat-btn').style.display = 'flex'
 }
 
 let handleUserJoined = async (user, mediaType) => {
@@ -181,14 +182,33 @@ let toggleCamera = async (e) => {
     }
 };
 
+let toggleChat = async () =>{
+    document.getElementById('chat-cont').classList.toggle('show');
+    document.getElementById('theme-toggle').classList.toggle('show');
+    document.getElementById('x-btn-chat').style.display = 'flex';
+}
+
+let toggleClose = async () => {
+    document.getElementById('chat-cont').classList.remove('show');;
+    document.getElementById('theme-toggle').classList.remove('show');
+    document.getElementById('x-btn-chat').style.display = 'none';
+
+}
+    
 
 
 document.getElementById('join-btn').addEventListener('click', joinStream);
 document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('join-btn').style.display = 'none' });
 document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('title').style.display = 'none' });
-document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('logo-left').style.display = 'block' });
+document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('logo-left').style.display = 'flex' });
 document.getElementById('join-btn').addEventListener('click', function () { document.getElementById('stream-controls').style.display = 'flex' });
 
 document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream)
+document.getElementById('leave-btn').addEventListener('click', function () { document.getElementById('title').style.display = 'flex' });
+document.getElementById('leave-btn').addEventListener('click', function () { document.getElementById('logo-left').style.display = 'none' });
+
 document.getElementById('mic-btn').addEventListener('click', toggleMic)
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
+
+document.getElementById('chat-btn').addEventListener('click', toggleChat);
+document.getElementById('x-btn-chat').addEventListener('click', toggleClose);

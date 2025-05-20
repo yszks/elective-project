@@ -9,11 +9,13 @@ toggleBtn.addEventListener('click', () => {
         themeImage.src = 'assets/images/roomzy-logo-light.png';
         logo.src = 'assets/images/roomzy-logo-light.png';
         document.getElementById('theme-toggle').style.backgroundColor = '#ffffff'; 
+        document.getElementById('side-chat').style.backgroundColor = '#69a0f9'; 
 
     } else {
         themeImage.src = 'assets/images/roomzy-logo-dark.png';
         logo.src = 'assets/images/roomzy-logo-dark.png';
         document.getElementById('theme-toggle').style.backgroundColor = '#0C0C0C'; 
+        document.getElementById('side-chat').style.backgroundColor = '#1D1D1D'; 
     }
 
     // Optional: Save preference to localStorage
@@ -29,7 +31,10 @@ window.onload = () => {
         themeImage.src = 'assets/images/roomzy-logo-light.png';
         logo.src = 'assets/images/roomzy-logo-light.png';
         document.getElementById('theme-toggle').style.backgroundColor = '#ffffff'; 
+        document.getElementById('side-chat').style.backgroundColor = '#69a0f9'; 
     }
-    else
+    else {
         document.getElementById('theme-toggle').style.backgroundColor = '#0C0C0C'; 
+        document.getElementById('side-chat').style.backgroundColor = '#1D1D1D'; 
+    }
 }
