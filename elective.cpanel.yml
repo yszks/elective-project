@@ -1,5 +1,0 @@
----
-deployment:
-  tasks:
-    - export DEPLOYPATH=/home/seupbvvg4y2j/repositories/elective-project/
-    - /bin/cp -R images $DEPLOYPATH
