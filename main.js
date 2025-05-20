@@ -119,6 +119,7 @@ let leaveAndRemoveLocalStream = async () => {
     document.getElementById('join-btn').style.display = 'block'
     document.getElementById('stream-controls').style.display = 'none'
     document.getElementById('video-streams').innerHTML = ''
+    document.getElementById('container-chat-btn').style.display = 'none'
 }
 
 let micPublished = false;
