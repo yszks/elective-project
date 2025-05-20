@@ -55,7 +55,7 @@ body.light-theme {
     background-color: transparent;
     border: 3px solid #203A49;
     z-index: 1000;
-    transition: transform 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
 }
 
 #theme-toggle::after {
@@ -89,11 +89,6 @@ body.light-theme #theme-toggle::after {
 #theme-toggle.show {
     margin-right: 50px;
     transform: translateX(-375px);
-}
-
-#theme-toggle.hide {
-    margin-right: 0px;
-    transform: translateX(0);
 }
 
 
@@ -198,10 +193,15 @@ button {
 }
 
 #x-btn-chat {
-    display: none;
+    transform: translateX(100%);
+    transition: transform 0.4s ease-in-out;
     position: fixed;
-    right: 0;
+    right: -15px;
     background-color: transparent;
+}
+
+#x-btn-chat.show{
+    transform: translateX(0);
 }
 
 .speaking {

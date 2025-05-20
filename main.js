@@ -186,13 +186,13 @@ let toggleCamera = async (e) => {
 let toggleChat = async () =>{
     document.getElementById('chat-cont').classList.toggle('show');
     document.getElementById('theme-toggle').classList.toggle('show');
-    document.getElementById('x-btn-chat').style.display = 'flex';
+    document.getElementById('x-btn-chat').classList.toggle('show');
 }
 
 let toggleClose = async () => {
     document.getElementById('chat-cont').classList.remove('show');;
     document.getElementById('theme-toggle').classList.remove('show');
-    document.getElementById('x-btn-chat').style.display = 'none';
+    document.getElementById('x-btn-chat').classList.remove('show');
 
 }
     
