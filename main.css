@@ -9,6 +9,11 @@
 }
 
 @font-face {
+    font-family: 'zabal';
+    src: url('assets/fonts/Zabal-sm.otf') format('opentype');
+}
+
+@font-face {
     font-family: 'Lemon';
     src: url('assets/fonts/LEMONMILK-Bold.otf') format('opentype');
 }
@@ -91,7 +96,6 @@ body.light-theme #theme-toggle::after {
     transform: translateX(-375px);
 }
 
-
 #title {
     margin-bottom: -5px;
     justify-self: center;
@@ -150,7 +154,7 @@ button {
     font-size: 16px;
     margin: 2px;
     cursor: pointer;
-    font-family: 'Coolvetica';
+    font-family: 'zabal';
 }
 
 #container-chat-btn {
@@ -273,4 +277,106 @@ button {
         max-width: 1400px;
         margin: 0px auto;
     }
+}
+
+/*register and login ------------------------------------------------------*/
+#pic-logo{
+    padding: 50px;
+    display: flex;
+}
+
+body .main-container{
+    display: flex;
+    justify-content: center;
+    margin-right: 180px;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.main-container *{
+    box-sizing: border-box;
+}
+
+h2 {
+    font-family: 'lemon';
+    font-size: 34px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+body.light-theme .form-box{
+    background-color: #69a0f9;
+}
+
+body:not(.light-theme) .form-box{
+    background-color: #242424;
+}
+
+body.light-theme .form-box p a{
+    color: #003297;
+}
+
+body:not(.light-theme) .form-box p a{
+    color: #69a0f9;
+}
+
+.form-box{    
+    border-radius: 20px;
+    width: 100%;
+    max-width: 450px;
+    display: none;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.form-box p{
+    font-family: 'zabal';
+    font-size: 14.5px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.form-box p a{
+    text-decoration: none;
+}
+
+.form-box p a:hover{
+    text-decoration: underline;
+}
+
+.form-box button{
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    transition: 0.5s;
+    cursor: pointer;
+    font-weight: 500;
+    border-radius: 10px;
+}
+
+.form-box.active{
+    display: block;
+}
+
+.main-container input{
+    background-color: whitesmoke;
+    width: 100%;
+    border-radius: 10px;
+    padding: 12px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    margin: 10px 0;
+    font-family: 'zabal';
+}
+
+.error-message{
+    font-family: 'zabal';
+    padding: 12px;
+    background-color: #f8d7da;
+    border-radius: 10px;
+    font-size: 16px;
+    color: #a42834;
+    text-align: center;
 }

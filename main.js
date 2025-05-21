@@ -208,6 +208,7 @@ document.getElementById('join-btn').addEventListener('click', function () { docu
 document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream)
 document.getElementById('leave-btn').addEventListener('click', function () { document.getElementById('title').style.display = 'flex' });
 document.getElementById('leave-btn').addEventListener('click', function () { document.getElementById('logo-left').style.display = 'none' });
+document.getElementById('leave-btn').addEventListener('click', function () { document.getElementById('side-chat').style.display = 'none' }); 
 
 document.getElementById('mic-btn').addEventListener('click', toggleMic)
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
