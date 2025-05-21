@@ -1,40 +1,49 @@
-const toggleBtn = document.getElementById('theme-toggle');
-const themeImage = document.getElementById('theme-image');
-const logo = document.getElementById('logogogo');
-
-toggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('light-theme');
-
-    if (document.body.classList.contains('light-theme')) {
-        themeImage.src = 'assets/images/roomzy-logo-light.png';
-        logo.src = 'assets/images/roomzy-logo-light.png';
-        document.getElementById('theme-toggle').style.backgroundColor = '#ffffff'; 
-        document.getElementById('side-chat').style.backgroundColor = '#69a0f9'; 
-
-    } else {
-        themeImage.src = 'assets/images/roomzy-logo-dark.png';
-        logo.src = 'assets/images/roomzy-logo-dark.png';
-        document.getElementById('theme-toggle').style.backgroundColor = '#0C0C0C'; 
-        document.getElementById('side-chat').style.backgroundColor = '#242424'; 
-    }
-
-    // Optional: Save preference to localStorage
-    const isLight = document.body.classList.contains('light-theme');
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-});
-
-// Optional: Load saved theme preference on page load
 window.onload = () => {
     const savedTheme = localStorage.getItem('theme');
+    const body = document.body;
+
+    const themeImage = document.getElementById('theme-image');
+    const logo = document.getElementById('logogogo');
+    const toggleBtn = document.getElementById('theme-toggle');
+    const sideChat = document.getElementById('side-chat');
+    const registForm = document.getElementById('regist-form');
+
+    // Apply theme on load
     if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-        themeImage.src = 'assets/images/roomzy-logo-light.png';
-        logo.src = 'assets/images/roomzy-logo-light.png';
-        document.getElementById('theme-toggle').style.backgroundColor = '#ffffff'; 
-        document.getElementById('side-chat').style.backgroundColor = '#69a0f9'; 
+        body.classList.add('light-theme');
+        if (themeImage) themeImage.src = 'assets/images/roomzy-logo-light.png';
+        if (logo) logo.src = 'assets/images/roomzy-logo-light.png';
+        if (toggleBtn) toggleBtn.style.backgroundColor = '#ffffff';
+        if (sideChat) sideChat.style.backgroundColor = '#69a0f9';
+        if (registForm) registForm.style.backgroundColor = '#69a0f9';
+    } else {
+        if (toggleBtn) toggleBtn.style.backgroundColor = '#0C0C0C';
+        if (sideChat) sideChat.style.backgroundColor = '#242424';
+        if (registForm) registForm.style.backgroundColor = '#242424';
     }
-    else {
-        document.getElementById('theme-toggle').style.backgroundColor = '#0C0C0C'; 
-        document.getElementById('side-chat').style.backgroundColor = '#1D1D1D'; 
+
+    // Theme toggle listener (must be here)
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('light-theme');
+
+            const isLight = body.classList.contains('light-theme');
+
+            if (isLight) {
+                if (themeImage) themeImage.src = 'assets/images/roomzy-logo-light.png';
+                if (logo) logo.src = 'assets/images/roomzy-logo-light.png';
+                toggleBtn.style.backgroundColor = '#ffffff';
+                if (sideChat) sideChat.style.backgroundColor = '#69a0f9';
+                if (registForm) registForm.style.backgroundColor = '#69a0f9';
+            } else {
+                if (themeImage) themeImage.src = 'assets/images/roomzy-logo-dark.png';
+                if (logo) logo.src = 'assets/images/roomzy-logo-dark.png';
+                toggleBtn.style.backgroundColor = '#0C0C0C';
+                if (sideChat) sideChat.style.backgroundColor = '#242424';
+                if (registForm) registForm.style.backgroundColor = '#242424';
+            }
+
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
     }
-}
+};
