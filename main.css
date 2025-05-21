@@ -187,7 +187,8 @@ button {
 
 #side-chat {
     position: absolute;
-    border-left: 3px solid #00094B;
+    border-left: 2px dashed #00094B;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     width: 100%;
     height: 100%;
 }
@@ -196,7 +197,8 @@ button {
     transform: translateX(100%);
     transition: transform 0.4s ease-in-out;
     position: fixed;
-    right: -15px;
+    top: 7px;
+    right: 0px;
     background-color: transparent;
 }
 
@@ -237,6 +239,7 @@ button {
     align-items: center;
     display: flex;
     border-radius: 20px;
+    background-color: #00094B;
 }
 
 .video-player {
@@ -264,7 +267,8 @@ button {
     #video-streams {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 10px;
+        row-gap: 10px;   
+        column-gap: 10px;
         width: 100%;
         max-width: 1400px;
         margin: 0px auto;

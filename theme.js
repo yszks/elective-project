@@ -15,7 +15,7 @@ toggleBtn.addEventListener('click', () => {
         themeImage.src = 'assets/images/roomzy-logo-dark.png';
         logo.src = 'assets/images/roomzy-logo-dark.png';
         document.getElementById('theme-toggle').style.backgroundColor = '#0C0C0C'; 
-        document.getElementById('side-chat').style.backgroundColor = '#1D1D1D'; 
+        document.getElementById('side-chat').style.backgroundColor = '#242424'; 
     }
 
     // Optional: Save preference to localStorage
