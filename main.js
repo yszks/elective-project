@@ -180,6 +180,7 @@ let toggleCamera = async (e) => {
                 class="camera-icon">
         `;
         button.style.backgroundColor = '#242424';
+        
     }
 };
 
