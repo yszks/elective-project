@@ -3,13 +3,13 @@ session_start();
 require_once 'public/config.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login-page.php");
+    header("Location: public/login-page.php");
     exit();
 }
 
 if (!isset($_SESSION['id'])) {
 
-    $imagePath = 'assets/uploads/default.png';
+    $imagePath = 'public/assets/uploads/default.png';
 } else {
     $id = $_SESSION['id'];
     $stmt = $conn->prepare("SELECT user_img FROM users WHERE id = ?");
@@ -19,9 +19,9 @@ if (!isset($_SESSION['id'])) {
 
     if ($result->num_rows === 1) {
         $row = $result->fetch_assoc();
-        $imagePath = 'assets/uploads/' . ($row['user_img'] ?? 'default.png');
+        $imagePath = 'public/assets/uploads/' . ($row['user_img'] ?? 'default.png');
     } else {
-        $imagePath = 'assets/uploads/default.png';
+        $imagePath = 'public/assets/uploads/default.png';
     }
     $stmt->close();
 }
@@ -100,11 +100,11 @@ if (!isset($_SESSION['id'])) {
             <div id="stream-controls">
                 <button id="leave-btn">Leave Room</button>
                 <button id="mic-btn" style="background-color: #FF8578;">
-                    <img src="assets/images/mic-off.png" alt="Mic Off"
+                    <img src="public/assets/images/mic-off.png" alt="Mic Off"
                         style="margin-left: -11px; margin-top: -2px; width: 23px; height: auto; pointer-events: none;">
                 </button>
                 <button id="camera-btn" style="background-color: #A1FF99;">
-                    <img src="assets/images/camera-on.png" alt="Camera Off"
+                    <img src="public/assets/images/camera-on.png" alt="Camera Off"
                         style="margin-left: -12px; margin-top: -6px; width: 26px; height: 31px; pointer-events: none;">
                 </button>
             </div>
