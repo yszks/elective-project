@@ -40,6 +40,7 @@ async function joinAndDisplayLocalStream() {
     await localTracks[0].setMuted(true); // Mute mic
     micPublished = false;
 
+    currentRoomId = CHANNEL;
     // Load existing messages when joining
     loadMessages();
 
@@ -136,6 +137,42 @@ let leaveAndRemoveLocalStream = async () => {
     document.getElementById('logout-btn').style.display = 'flex';
 }
 
+
+async function fetchUsername() {
+    try {
+        const response = await fetch('https://www.i-bulong.com/get-username', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch username');
+        }
+        
+        const data = await response.json();
+        return data.username; // Assuming the response has a username field
+    } catch (error) {
+        console.error('Error fetching username:', error);
+        alert('Error fetching username: ' + error.message);
+        return null; // Return null if there's an error
+    }
+}
+
+let username;
+
+window.addEventListener('load', async () => {
+    username = await fetchUsername(); // Fetch and set the username
+    if (!username) {
+        alert('Could not retrieve username. Please try again.');
+        return;
+    }
+
+    // Set up event listeners and other initialization code
+    document.getElementById('join-btn').addEventListener('click', joinStream);
+    // ... other event listeners
+});
+
+
 // === create room ===
 async function createRoom() {
     const roomName = prompt("Enter room name:");
@@ -191,18 +228,19 @@ async function sendMessage(message) {
         const response = await fetch('https://www.i-bulong.com/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, message, roomId: '${roomId}' })
+            body: JSON.stringify({ username, message, roomId: currentRoomId })
         });
         if (!response.ok) {
-            const errorMessage = await response.text(); // Get the error message from the response
+            const errorMessage = await response.text();
             throw new Error(`Failed to send message: ${errorMessage}`);
         }
         loadMessages(); // Reload messages after sending
     } catch (error) {
         console.error('Error sending message:', error);
-        alert('Error sending message: ' + error.message); // Display error to user
+        alert('Error sending message: ' + error.message);
     }
 }
+
 
 
 async function loadMessages() {
