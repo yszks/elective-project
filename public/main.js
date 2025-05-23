@@ -308,11 +308,11 @@ function appendMessage(sender, message) {
 }
 
 function systemMessage(msg) {
-  const messagesContainer = document.getElementById("messages");
-  const messageElement = document.createElement("div");
-  messageElement.classList.add("system-message");
-  messageElement.textContent = msg;
-  messagesContainer.appendChild(messageElement);
+    const messagesContainer = document.getElementById("messages");
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("system-message");
+    messageElement.textContent = msg;
+    messagesContainer.appendChild(messageElement);
 }
 
 
@@ -372,9 +372,13 @@ let toggleCamera = async (e) => {
 
 // === Event Listeners ===
 window.addEventListener('load', () => {
-    document.getElementById('join-btn').addEventListener('click', () => {
-        if (currentRoomId) joinRoom(currentRoomId);
-    });
+    const joinBtn = document.getElementById('join-btn');
+    if (joinBtn) {
+        joinBtn.addEventListener('click', () => {
+            if (currentRoomId) joinRoom(currentRoomId);
+        });
+    }
+
 
     document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream);
     document.getElementById('mic-btn').addEventListener('click', toggleMic);
@@ -382,17 +386,17 @@ window.addEventListener('load', () => {
     document.getElementById('chat-btn').addEventListener('click', toggleChat);
     document.getElementById('x-btn-chat').addEventListener('click', toggleClose);
     document.getElementById('send-btn').addEventListener('click', () => {
-    const msgInput = document.getElementById('chat-input');
-    const message = msgInput.value.trim();
-    if (message && currentRoomId && username) {
-        sendMessage(currentRoomId, username, message);
-        msgInput.value = '';
-    }
-});
+        const msgInput = document.getElementById('chat-input');
+        const message = msgInput.value.trim();
+        if (message && currentRoomId && username) {
+            sendMessage(currentRoomId, username, message);
+            msgInput.value = '';
+        }
+    });
 
     // Optionally, load messages periodically
     setInterval(() => {
-  if (currentRoomId) loadMessages(currentRoomId);
-}, 5000);
+        if (currentRoomId) loadMessages(currentRoomId);
+    }, 5000);
 
 });
