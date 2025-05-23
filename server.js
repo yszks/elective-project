@@ -33,12 +33,14 @@ db.connect(err => {
 });
 
 // Create Socket.IO server
-const io = new Server(server, {
-  cors: {
-    origin: 'https://www.i-bulong.com',
-    methods: ['GET', 'POST']
-  }
-});
+     const io = new Server(server, {
+       cors: {
+         origin: 'https://www.i-bulong.com',
+         methods: ['GET', 'POST'],
+         allowedHeaders: ['Content-Type']
+       }
+     });
+     
 
 // In-memory map of room users
 const roomUserMap = {};
