@@ -116,37 +116,6 @@ app.post('/messages', (req, res) => {
     );
 });
 
-const http = require('http').createServer(app);
-const io = require('socket.io')(http, {
-    cors: {
-        origin: 'https://www.i-bulong.com',
-        methods: ['GET', 'POST']
-    }
-});
-
-io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
-
-    socket.on('join-room', (roomId) => {
-        socket.join(roomId);
-        console.log(`User joined room: ${roomId}`);
-    });
-
-    socket.on('send-message', ({ roomId, username, message }) => {
-        const query = 'INSERT INTO messages (username, message, room_id, timestamp) VALUES (?, ?, ?, NOW())';
-        db.query(query, [username, message, roomId], (err) => {
-            if (!err) {
-                io.to(roomId).emit('receive-message', { username, message, timestamp: new Date() });
-            } else {
-                console.error('DB error:', err);
-            }
-        });
-    });
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-    });
-});
 
 // Start the server
 const PORT = process.env.PORT || 3000; // Use environment variable for port
