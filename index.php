@@ -65,7 +65,7 @@ if (!isset($_SESSION['id'])) {
 
             <button id="theme-toggle"></button>
             <div id="head-buttons">
-                <button id="create-room-btn">Create Room</button>
+                <button id="create-room-btn" onclick="createRoom()">Create Room</button>
                 <a href="public/logout.php" onclick="return confirm('Are you sure you want to logout?')"><button id="logout-btn">Logout</button></a>
             </div>
 

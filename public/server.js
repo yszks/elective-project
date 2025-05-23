@@ -22,14 +22,64 @@ const db = mysql.createConnection({
     database: 'chat'
 });
 
-// Connect to the database
-db.connect(err => {
-    if (err) {
-        console.error('Database connection failed:', err.stack);
-        return;
+// Create a new room
+app.post('/rooms', (req, res) => {
+    const { roomName } = req.body;
+    if (!roomName) {
+        return res.status(400).send('Room name is required');
     }
-    console.log('Connected to MySQL database');
+    db.query(
+        'INSERT INTO rooms (room_name) VALUES (?)',
+        [roomName],
+        (err, results) => {
+            if (err) {
+                console.error('Error creating room:', err);
+                return res.status(500).send('Internal Server Error');
+            }
+            res.status(201).json({ roomId: results.insertId, roomName });
+        }
+    );
 });
+
+// Function to delete a room if no users are left
+function deleteRoomIfEmpty(roomId) {
+    db.query(
+        'SELECT COUNT(*) AS userCount FROM users WHERE room_id = ?',
+        [roomId],
+        (err, results) => {
+            if (err) {
+                console.error('Error checking user count:', err);
+                return;
+            }
+            if (results[0].userCount < 1) {
+                db.query(
+                    'DELETE FROM rooms WHERE id = ?',
+                    [roomId],
+                    (err) => {
+                        if (err) {
+                            console.error('Error deleting room:', err);
+                        } else {
+                            console.log(`Room ${roomId} deleted as it is empty.`);
+                        }
+                    }
+                );
+            }
+        }
+    );
+}
+
+// Call this function when a user leaves a room
+app.post('/leave-room', (req, res) => {
+    const { userId, roomId } = req.body;
+    // Logic to remove user from the room
+    // ...
+
+    // Check if the room is empty and delete if necessary
+    deleteRoomIfEmpty(roomId);
+    res.sendStatus(200);
+});
+
+
 
 // Get messages for a specific room
 app.get('/messages', (req, res) => {

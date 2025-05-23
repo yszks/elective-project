@@ -56,8 +56,6 @@ async function joinAndDisplayLocalStream() {
         } else {
             videoContainer.style.border = "";
         }
-
-        console.log(`Local mic level: ${level.toFixed(2)}`);
     }, 200);
 
     client.on('volume-indicator', volumes => {
@@ -138,6 +136,44 @@ let leaveAndRemoveLocalStream = async () => {
     document.getElementById('logout-btn').style.display = 'flex';
 }
 
+// === create room ===
+async function createRoom() {
+    const roomName = prompt("Enter room name:");
+    if (!roomName) return;
+
+    try {
+        const response = await fetch('https://www.i-bulong.com/rooms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomName })
+        });
+        if (!response.ok) throw new Error('Failed to create room');
+        const data = await response.json();
+        alert(`Room created with ID: ${data.roomId}`);
+        // Optionally, redirect to the new room or update the UI
+    } catch (error) {
+        console.error('Error creating room:', error);
+        alert('Error creating room: ' + error.message);
+    }
+}
+
+async function leaveRoom(roomId) {
+    const userId = UID;
+    try {
+        const response = await fetch('https://www.i-bulong.com/leave-room', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, roomId })
+        });
+        if (!response.ok) throw new Error('Failed to leave room');
+        alert('You have left the room.');
+    } catch (error) {
+        console.error('Error leaving room:', error);
+        alert('Error leaving room: ' + error.message);
+    }
+}
+
+
 // === Chat Functions ===
 async function sendMessage(message) {
     if (!username) {
@@ -148,14 +184,19 @@ async function sendMessage(message) {
         const response = await fetch('https://www.i-bulong.com/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, message })
+            body: JSON.stringify({ username, message, roomId: 'yourRoomId' }) // Include roomId
         });
-        if (!response.ok) throw new Error('Failed to send message');
+        if (!response.ok) {
+            const errorMessage = await response.text(); // Get the error message from the response
+            throw new Error(`Failed to send message: ${errorMessage}`);
+        }
         loadMessages(); // Reload messages after sending
     } catch (error) {
         console.error('Error sending message:', error);
+        alert('Error sending message: ' + error.message); // Display error to user
     }
 }
+
 
 async function loadMessages() {
     const roomId = 'yourRoomId'; // Replace with the actual room ID

@@ -2,6 +2,11 @@
 session_start();
 require_once 'config.php';
 
+if (!isset($_SESSION['id'])) {
+    header("Location: login-page.php");
+    exit();
+}
+
 $id = $_SESSION['id'];
 
 $stmt = $conn->prepare("SELECT username, email, password, user_img FROM users WHERE id = ?");
