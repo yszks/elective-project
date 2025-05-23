@@ -49,7 +49,7 @@ if (!isset($_SESSION['id'])) {
 
             <div id="container-chat-btn">
                 <button id="chat-btn">
-                    <img src="assets/images/chat-icon-dark.png" alt="chats"
+                    <img src="public/assets/images/chat-icon-dark.png" alt="chats"
                         style="width: 25px; height: auto; pointer-events: none; ">
                 </button>
             </div>

@@ -215,14 +215,14 @@ let toggleCamera = async (e) => {
         await localTracks[1].setMuted(false);
         isCameraOn = true;
         button.innerHTML = `
-            <img src="assets/images/camera-on.png" alt="Camera On" class="camera-icon">
+            <img src="public/assets/images/camera-on.png" alt="Camera On" class="camera-icon">
         `;
         button.style.backgroundColor = '#A1FF99';
     } else {
         await localTracks[1].setMuted(true);
         isCameraOn = false;
         button.innerHTML = `
-            <img src="assets/images/camera-off.png" alt="Camera Off" class="camera-icon">
+            <img src="public/assets/images/camera-off.png" alt="Camera Off" class="camera-icon">
         `;
         button.style.backgroundColor = '#242424';
     }
