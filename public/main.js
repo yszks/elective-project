@@ -9,7 +9,6 @@ let remoteUsers = {};  // Remote users map
 let UID;               // Local user ID
 let micPublished = false; // Track microphone status
 let isCameraOn = true; // Track camera status
-let currentRoomId = 'elective';
 
 // === Agora Video SDK ===
 async function joinAndDisplayLocalStream() {
@@ -76,20 +75,49 @@ async function joinAndDisplayLocalStream() {
     });
 }
 
-async function joinRoom(roomId) {
-    console.log(`Joining room with ID: ${roomId}`);
+function initializeUI() {
+    const chatBtn = document.getElementById("chat-btn");
+    const chatSidebar = document.getElementById("side-chat");
+    const closeChatBtn = document.getElementById("x-btn-chat");
 
-    // Join the stream with the given room ID
-    await joinAndDisplayLocalStream(roomId);
+    if (chatBtn && chatSidebar && closeChatBtn) {
+        chatBtn.addEventListener("click", () => {
+            chatSidebar.style.display = "block";
+        });
 
-    // Update UI
-    document.getElementById('join-btn').style.display = 'none';
-    document.getElementById('stream-controls').style.display = 'flex';
-    document.getElementById('container-chat-btn').style.display = 'flex';
-    document.getElementById('title').style.display = 'none';
-    document.getElementById('logo-left').style.display = 'flex';
-    document.getElementById('create-room-btn').style.display = 'none';
-    document.getElementById('logout-btn').style.display = 'none';
+        closeChatBtn.addEventListener("click", () => {
+            chatSidebar.style.display = "none";
+        });
+    }
+
+    const sendBtn = document.getElementById("send-btn");
+    const chatInput = document.getElementById("chat-input");
+
+    if (sendBtn && chatInput) {
+        sendBtn.addEventListener("click", () => {
+            const message = chatInput.value.trim();
+            if (message && currentRoomId) {
+                sendMessage(currentRoomId, username, message);
+                chatInput.value = '';
+            }
+        });
+    }
+}
+
+function registerEventHandlers() {
+    socket.on("connect", () => {
+        console.log("Connected to Socket.IO server");
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Disconnected from Socket.IO server");
+    });
+}
+
+function joinRoom(roomId) {
+    currentRoomId = roomId;
+    socket.emit("join-room", { roomId, username });
+    loadMessages(roomId);
 }
 
 
@@ -170,39 +198,34 @@ async function checkActiveRooms() {
 setInterval(checkActiveRooms, 5000); // Check every 5 seconds
 
 
-async function fetchUsername() {
+const socket = io("https://www.i-bulong.com");
+
+let currentRoomId = null;
+let username = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const response = await fetch('https://www.i-bulong.com/get-username', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch username');
-        }
-        
-        const data = await response.json();
-        return data.username; // Assuming the response has a username field
+        const userData = await fetchUsername();
+        username = userData.username;
+
+        initializeUI();
+        registerEventHandlers();
     } catch (error) {
-        console.error('Error fetching username:', error);
-        alert('Error fetching username: ' + error.message);
-        return null; // Return null if there's an error
+        console.error("Initialization failed:", error);
+        alert("Failed to fetch user data. Please log in again.");
+        window.location.href = "public/login-page.php";
     }
-}
-
-let username;
-
-window.addEventListener('load', async () => {
-    username = await fetchUsername(); // Fetch and set the username
-    if (!username) {
-        alert('Could not retrieve username. Please try again.');
-        return;
-    }
-
-    // Set up event listeners and other initialization code
-    document.getElementById('join-btn').addEventListener('click', joinRoom(currentRoomId));
-    // ... other event listeners
 });
+
+async function fetchUsername() {
+    const response = await fetch('public/get-username.php', {
+        credentials: 'include'
+    });
+    if (!response.ok) {
+        throw new Error("Failed to fetch username");
+    }
+    return await response.json();
+}
 
 
 // === create room ===
@@ -216,12 +239,12 @@ async function createRoom() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ roomName })
         });
-        
+
         if (!response.ok) {
             const errorText = await response.text(); // Get the error message from the response
             throw new Error(`Failed to create room: ${errorText}`);
         }
-        
+
         const data = await response.json();
         alert(`Room created with ID: ${data.roomId}`);
         // Optionally, redirect to the new room or update the UI
@@ -251,49 +274,46 @@ async function leaveRoom(roomId) {
 
 
 // === Chat Functions ===
-async function sendMessage(message) {
-    if (!username) {
-        alert('Please enter your username.');
-        return;
-    }
-    try {
-        const response = await fetch('https://www.i-bulong.com/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, message, roomId: currentRoomId })
-        });
-        if (!response.ok) {
-            const errorMessage = await response.text();
-            throw new Error(`Failed to send message: ${errorMessage}`);
-        }
-        loadMessages(); // Reload messages after sending
-    } catch (error) {
-        console.error('Error sending message:', error);
-        alert('Error sending message: ' + error.message);
-    }
+function sendMessage(roomId, username, message) {
+    fetch('/messages', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, username, message })
+    })
+        .then(res => {
+            if (!res.ok) throw new Error("Failed to send message");
+            appendMessage(username, message);
+        })
+        .catch(err => console.error("Error sending message:", err));
+}
+
+function loadMessages(roomId) {
+    fetch(`/messages?roomId=${roomId}`)
+        .then(response => response.json())
+        .then(messages => {
+            const messagesContainer = document.getElementById("messages");
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            messagesContainer.innerHTML = '';
+            messages.forEach(msg => appendMessage(msg.username, msg.message));
+        })
+        .catch(err => console.error("Error loading messages:", err));
 }
 
 
-
-async function loadMessages() {
-    const roomId = currentRoomId; // Use the variable that holds the current room ID
-    fetch(`https://www.i-bulong.com/messages?roomId=${roomId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Process and display messages
-            console.log(data);
-        })
-        .catch(error => {
-            console.error('Error loading messages:', error);
-            // Display error message to the user
-        });
+function appendMessage(sender, message) {
+    const messagesContainer = document.getElementById("messages");
+    const messageElement = document.createElement("div");
+    messageElement.textContent = `${sender}: ${message}`;
+    messagesContainer.appendChild(messageElement);
 }
 
+function systemMessage(msg) {
+  const messagesContainer = document.getElementById("messages");
+  const messageElement = document.createElement("div");
+  messageElement.classList.add("system-message");
+  messageElement.textContent = msg;
+  messagesContainer.appendChild(messageElement);
+}
 
 
 
@@ -348,33 +368,31 @@ let toggleCamera = async (e) => {
     }
 };
 
-// === Chat Toggle ===
-let toggleChat = async () => {
-    document.getElementById('chat-cont').classList.toggle('show');
-    document.getElementById('theme-toggle').classList.toggle('show');
-    document.getElementById('x-btn-chat').classList.toggle('show');
-}
 
-let toggleClose = async () => {
-    document.getElementById('chat-cont').classList.remove('show');
-    document.getElementById('theme-toggle').classList.remove('show');
-    document.getElementById('x-btn-chat').classList.remove('show');
-}
 
 // === Event Listeners ===
 window.addEventListener('load', () => {
-    document.getElementById('join-btn').addEventListener('click', joinRoom(currentRoomId));
+    document.getElementById('join-btn').addEventListener('click', () => {
+        if (currentRoomId) joinRoom(currentRoomId);
+    });
+
     document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream);
     document.getElementById('mic-btn').addEventListener('click', toggleMic);
     document.getElementById('camera-btn').addEventListener('click', toggleCamera);
     document.getElementById('chat-btn').addEventListener('click', toggleChat);
     document.getElementById('x-btn-chat').addEventListener('click', toggleClose);
     document.getElementById('send-btn').addEventListener('click', () => {
-        const msgInput = document.getElementById('chat-input');
-        sendMessage(msgInput.value);
+    const msgInput = document.getElementById('chat-input');
+    const message = msgInput.value.trim();
+    if (message && currentRoomId && username) {
+        sendMessage(currentRoomId, username, message);
         msgInput.value = '';
-    });
-    
+    }
+});
+
     // Optionally, load messages periodically
-    setInterval(loadMessages, 5000);
+    setInterval(() => {
+  if (currentRoomId) loadMessages(currentRoomId);
+}, 5000);
+
 });
