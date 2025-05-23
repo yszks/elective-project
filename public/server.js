@@ -85,7 +85,7 @@ app.post('/leave-room', (req, res) => {
 app.get('/messages', (req, res) => {
     const roomId = req.query.roomId;
     db.query(
-        'SELECT * FROM users WHERE room_id = ? ORDER BY timestamp ASC',
+        'SELECT * FROM messages WHERE room_id = ? ORDER BY timestamp ASC',
         [roomId],
         (err, results) => {
             if (err) {
@@ -104,7 +104,7 @@ app.post('/messages', (req, res) => {
         return res.status(400).send('Bad Request: Missing required fields');
     }
     db.query(
-        'INSERT INTO users (username, message, room_id, timestamp) VALUES (?, ?, ?, NOW())',
+        'INSERT INTO messages (username, message, room_id, timestamp) VALUES (?, ?, ?, NOW())',
         [username, message, roomId],
         (err) => {
             if (err) {
@@ -118,7 +118,42 @@ app.post('/messages', (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 3000; // Use environment variable for port
-app.listen(PORT, () => {
-    console.log(`Server running on https://www.i-bulong.com:${PORT}`);
+const http = require('http').createServer(app);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: 'https://www.i-bulong.com',
+        methods: ['GET', 'POST']
+    }
+});
+
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    socket.on('join-room', (roomId) => {
+        socket.join(roomId);
+        console.log(`User joined room: ${roomId}`);
+    });
+
+    socket.on('send-message', ({ roomId, username, message }) => {
+        const query = 'INSERT INTO messages (username, message, room_id, timestamp) VALUES (?, ?, ?, NOW())';
+        db.query(query, [username, message, roomId], (err) => {
+            if (!err) {
+                io.to(roomId).emit('receive-message', { username, message, timestamp: new Date() });
+            } else {
+                console.error('DB error:', err);
+            }
+        });
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
+
+// Replace this:
+// app.listen(PORT, ...)
+// With this:
+http.listen(PORT, () => {
+    console.log(`Server with Socket.IO running on https://www.i-bulong.com:${PORT}`);
 });
 
