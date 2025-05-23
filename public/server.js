@@ -7,7 +7,7 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: 'https://www.i-bulong.com', // Replace with your actual frontend URL
+    origin: 'https://www.i-bulong.com', 
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));

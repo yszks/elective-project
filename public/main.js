@@ -145,7 +145,7 @@ async function sendMessage(message) {
         return;
     }
     try {
-        const response = await fetch('http://localhost:3000/messages', {
+        const response = await fetch('https://www.i-bulong.com/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, message })
@@ -159,7 +159,7 @@ async function sendMessage(message) {
 
 async function loadMessages() {
     const roomId = 'yourRoomId'; // Replace with the actual room ID
-    fetch(`http://localhost:3000/messages?roomId=${roomId}`)
+    fetch(`https://www.i-bulong.com/messages?roomId=${roomId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
