@@ -198,7 +198,7 @@ async function checkActiveRooms() {
 setInterval(checkActiveRooms, 5000); // Check every 5 seconds
 
 
-const socket = io("https://www.i-bulong.com");
+const socket = io("https://elective-project.onrender.com");
 
 let currentRoomId = null;
 let username = null;
