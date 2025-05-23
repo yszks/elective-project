@@ -36,14 +36,14 @@ if (!isset($_SESSION['id'])) {
     <meta https-equiv='X-UA-Compatible' content='IE=edge'>
     <title>iBulong</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='public/main.css'>
 </head>
 
 <body>
     <div id="page-wrapper">
         <div id="main-content">
 
-            <a href="profile-page.php" target="_self">
+            <a href="public/profile-page.php" target="_self">
                 <button id="user-profile" style="background-image: url('<?= htmlspecialchars($imagePath) ?>'); background-size: cover; background-position: center; background-repeat: no-repeat; border: 3px solid #003297; cursor: pointer;"></button>
             </a>
 
