@@ -39,7 +39,7 @@ if (isset($_POST['login'])) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $user['email'];
 
-            header("Location: index.php");
+            header("Location: ../index.php");
             exit();
         }
     }
