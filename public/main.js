@@ -383,8 +383,6 @@ window.addEventListener('load', () => {
     document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream);
     document.getElementById('mic-btn').addEventListener('click', toggleMic);
     document.getElementById('camera-btn').addEventListener('click', toggleCamera);
-    document.getElementById('chat-btn').addEventListener('click', toggleChat);
-    document.getElementById('x-btn-chat').addEventListener('click', toggleClose);
     document.getElementById('send-btn').addEventListener('click', () => {
         const msgInput = document.getElementById('chat-input');
         const message = msgInput.value.trim();

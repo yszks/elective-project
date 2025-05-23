@@ -5,10 +5,9 @@ const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const { Server } = require('socket.io');
 
-const socket = io("https://www.i-bulong.com:3000");  // Example if running on port 3000
-
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: 'https://www.i-bulong.com',
