@@ -1,6 +1,6 @@
 // Agora Video SDK credentials
 const APP_ID = "384b88429f6c4934bd13dae2a9c2a5ab";
-const TOKEN = "007eJxTYEjMmdHd0Nm3wHjG55Jzn7yFrvo6cN0Pk9z5z0lqpoOls64Cg7GFSZKFhYmRZZpZsomlsUlSiqFxSmKqUaJlslGiaWJS3km9jIZARob2ffnMjAwQCOJzMKTmpCaXZJalMjAAAJ/nIHw=";
+const TOKEN = "007eJxTYIjb6F1X8sptrwLbEs/r/+acuMQ3jbWLsWfFOkUfzoI7eZ0KDMYWJkkWFiZGlmlmySaWxiZJKYbGKYmpRomWyUaJpolJJ0sNMhoCGRnerolnYWSAQBCfgyE1JzW5JLMslYEBALr1ISs=";
 const CHANNEL = "elective";
 
 let client;           // AgoraRTC client
@@ -145,7 +145,7 @@ async function sendMessage(message) {
         return;
     }
     try {
-        const response = await fetch('/messages', {
+        const response = await fetch('http://localhost:3000/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, message })
@@ -158,22 +158,24 @@ async function sendMessage(message) {
 }
 
 async function loadMessages() {
-    try {
-        const response = await fetch(`/messages?roomId=${CHANNEL}`);
-        if (!response.ok) throw new Error('Failed to load messages');
-        const messages = await response.json();
-        const messagesContainer = document.getElementById('messages');
-        messagesContainer.innerHTML = ''; // Clear existing messages
-        messages.forEach(msg => {
-            const msgElement = document.createElement('div');
-            msgElement.className = 'message';
-            msgElement.innerHTML = `<div class="meta">${msg.username} • ${new Date(msg.timestamp).toLocaleTimeString()}</div><div>${msg.message}</div>`;
-            messagesContainer.appendChild(msgElement);
+    const roomId = 'yourRoomId'; // Replace with the actual room ID
+    fetch(`http://localhost:3000/messages?roomId=${roomId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Process and display messages
+            console.log(data);
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+            // Display error message to the user
         });
-    } catch (error) {
-        console.error('Error loading messages:', error);
-    }
 }
+
 
 // === Microphone and Camera Control ===
 let toggleMic = async (e) => {
