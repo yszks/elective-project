@@ -184,7 +184,7 @@ async function sendMessage(message) {
         const response = await fetch('https://www.i-bulong.com/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, message, roomId: 'yourRoomId' }) // Include roomId
+            body: JSON.stringify({ username, message, roomId: '${roomId}' })
         });
         if (!response.ok) {
             const errorMessage = await response.text(); // Get the error message from the response
