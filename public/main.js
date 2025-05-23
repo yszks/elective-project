@@ -200,7 +200,7 @@ window.addEventListener('load', async () => {
     }
 
     // Set up event listeners and other initialization code
-    document.getElementById('join-btn').addEventListener('click', joinStream);
+    document.getElementById('join-btn').addEventListener('click', joinRoom);
     // ... other event listeners
 });
 
@@ -363,7 +363,7 @@ let toggleClose = async () => {
 
 // === Event Listeners ===
 window.addEventListener('load', () => {
-    document.getElementById('join-btn').addEventListener('click', joinStream);
+    document.getElementById('join-btn').addEventListener('click', joinRoom);
     document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream);
     document.getElementById('mic-btn').addEventListener('click', toggleMic);
     document.getElementById('camera-btn').addEventListener('click', toggleCamera);
