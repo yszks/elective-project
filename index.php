@@ -55,18 +55,18 @@ if (!isset($_SESSION['id'])) {
             </div>
 
             <div id="title">
-                <a href="" target="_self"><img id="theme-image" src="public/assets/images/roomzy-logo-dark.png" alt="iBulong" width="500px"
+                <a href="index.php" target="_self"><img id="theme-image" src="public/assets/images/roomzy-logo-dark.png" alt="iBulong" width="500px"
                         height="auto"></a>
             </div>
 
             <div id="logo-left">
-                <a href="" target="_self"><img id="logogogo" src="public/assets/images/roomzy-logo-dark.png" alt="iBulong" width="180px" height="auto"></a>
+                <a href="index.php" target="_self"><img id="logogogo" src="public/assets/images/roomzy-logo-dark.png" alt="iBulong" width="180px" height="auto"></a>
             </div>
 
             <button id="theme-toggle"></button>
             <div id="head-buttons">
                 <button id="create-room-btn">Create Room</button>
-                <a href="logout.php" onclick="return confirm('Are you sure you want to logout?')"><button id="logout-btn">Logout</button></a>
+                <a href="public/logout.php" onclick="return confirm('Are you sure you want to logout?')"><button id="logout-btn">Logout</button></a>
             </div>
 
             <div class="container-join-btn">
