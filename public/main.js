@@ -193,7 +193,7 @@ let toggleMic = async (e) => {
         await micTrack.setMuted(false);
         console.log("Mic unmuted");
         button.innerHTML = `
-            <img src="assets/images/mic-on.png" alt="Mic On" class="mic-icon">
+            <img src="public/assets/images/mic-on.png" alt="Mic On" class="mic-icon">
         `;
         button.style.backgroundColor = '#242424';
         document.getElementById('mute-icon').style.display = 'none';
@@ -201,7 +201,7 @@ let toggleMic = async (e) => {
         await micTrack.setMuted(true);
         console.log("Mic muted");
         button.innerHTML = `
-            <img src="assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
+            <img src="public/assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
         `;
         button.style.backgroundColor = '#FF8578';
         document.getElementById('mute-icon').style.display = 'flex';
