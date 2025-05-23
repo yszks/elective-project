@@ -116,8 +116,6 @@ app.post('/messages', (req, res) => {
     );
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000; // Use environment variable for port
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
@@ -150,9 +148,8 @@ io.on('connection', (socket) => {
     });
 });
 
-// Replace this:
-// app.listen(PORT, ...)
-// With this:
+// Start the server
+const PORT = process.env.PORT || 3000; // Use environment variable for port
 http.listen(PORT, () => {
     console.log(`Server with Socket.IO running on https://www.i-bulong.com:${PORT}`);
 });
