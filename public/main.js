@@ -76,8 +76,13 @@ async function joinAndDisplayLocalStream() {
     });
 }
 
-async function joinStream() {
-    await joinAndDisplayLocalStream();
+async function joinRoom(roomId) {
+    console.log(`Joining room with ID: ${roomId}`);
+
+    // Join the stream with the given room ID
+    await joinAndDisplayLocalStream(roomId);
+
+    // Update UI
     document.getElementById('join-btn').style.display = 'none';
     document.getElementById('stream-controls').style.display = 'flex';
     document.getElementById('container-chat-btn').style.display = 'flex';
@@ -86,6 +91,7 @@ async function joinStream() {
     document.getElementById('create-room-btn').style.display = 'none';
     document.getElementById('logout-btn').style.display = 'none';
 }
+
 
 // Handle remote users publishing tracks
 async function handleUserJoined(user, mediaType) {
@@ -136,6 +142,32 @@ let leaveAndRemoveLocalStream = async () => {
     document.getElementById('head-buttons').style.display = 'flex';
     document.getElementById('logout-btn').style.display = 'flex';
 }
+
+async function checkActiveRooms() {
+    try {
+        const response = await fetch('get-rooms.php');
+        if (!response.ok) throw new Error('Failed to fetch rooms');
+
+        const rooms = await response.json();
+        const joinButtonContainer = document.querySelector('.container-join-btn');
+
+        // Clear existing buttons
+        joinButtonContainer.innerHTML = '';
+
+        // Create a button for each active room
+        rooms.forEach(room => {
+            const button = document.createElement('button');
+            button.textContent = `Join ${room.name}`;
+            button.onclick = () => joinRoom(room.id); // Call joinRoom with the room ID
+            joinButtonContainer.appendChild(button);
+        });
+    } catch (error) {
+        console.error('Error checking active rooms:', error);
+    }
+}
+
+// Call this function periodically or on page load
+setInterval(checkActiveRooms, 5000); // Check every 5 seconds
 
 
 async function fetchUsername() {
