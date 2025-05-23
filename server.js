@@ -45,7 +45,7 @@ const roomUserMap = {};
 
 // SOCKET.IO EVENTS
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+  console.log('User  connected:', socket.id);
 
   socket.on('join-room', ({ roomId, username }) => {
     socket.join(roomId);
@@ -69,14 +69,20 @@ io.on('connection', (socket) => {
 
         // Delete messages when room is empty
         db.query('DELETE FROM messages WHERE room_id = ?', [roomId], (err) => {
-          if (err) return console.error(`Failed to delete messages for room ${roomId}:`, err.message);
-          console.log(`All messages for room ${roomId} deleted.`);
+          if (err) {
+            console.error(`Failed to delete messages for room ${roomId}:`, err.message);
+          } else {
+            console.log(`All messages for room ${roomId} deleted.`);
+          }
         });
 
         // Also delete the room itself
         db.query('DELETE FROM rooms WHERE id = ?', [roomId], (err) => {
-          if (err) return console.error(`Failed to delete room ${roomId}:`, err.message);
-          console.log(`Room ${roomId} deleted.`);
+          if (err) {
+            console.error(`Failed to delete room ${roomId}:`, err.message);
+          } else {
+            console.log(`Room ${roomId} deleted.`);
+          }
         });
       }
     }
@@ -91,7 +97,10 @@ app.post('/rooms', (req, res) => {
   if (!roomName) return res.status(400).send('Room name is required');
 
   db.query('INSERT INTO rooms (room_name) VALUES (?)', [roomName], (err, results) => {
-    if (err) return res.status(500).send('Error creating room');
+    if (err) {
+      console.error('Error creating room:', err.message);
+      return res.status(500).send('Error creating room');
+    }
     res.status(201).json({ roomId: results.insertId, roomName });
   });
 });
@@ -105,11 +114,17 @@ app.post('/leave-room', (req, res) => {
 
 function deleteRoomIfEmpty(roomId) {
   db.query('SELECT COUNT(*) AS userCount FROM users WHERE room_id = ?', [roomId], (err, results) => {
-    if (err) return console.error(err);
+    if (err) {
+      console.error(err);
+      return;
+    }
     if (results[0].userCount < 1) {
       db.query('DELETE FROM rooms WHERE id = ?', [roomId], err => {
-        if (err) return console.error(err);
-        console.log(`Room ${roomId} deleted.`);
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(`Room ${roomId} deleted.`);
+        }
       });
     }
   });
@@ -121,7 +136,10 @@ app.get('/messages', (req, res) => {
   if (!roomId) return res.status(400).send('Room ID required');
 
   db.query('SELECT * FROM messages WHERE room_id = ? ORDER BY timestamp ASC', [roomId], (err, results) => {
-    if (err) return res.status(500).send('Error fetching messages');
+    if (err) {
+      console.error('Error fetching messages:', err.message);
+      return res.status(500).send('Error fetching messages');
+    }
     res.json(results);
   });
 });
@@ -135,12 +153,17 @@ app.post('/messages', (req, res) => {
     'INSERT INTO messages (username, message, room_id, timestamp) VALUES (?, ?, ?, NOW())',
     [username, message, roomId],
     (err) => {
-      if (err) return res.status(500).send('Error sending message');
+      if (err) {
+        console.error('Error sending message:', err.message);
+        return res.status(500).send('Error sending message');
+      }
       res.sendStatus(200);
     }
   );
 });
 
 // Start the server
-console.log(`Server running at https://elective-project.onrender.com`);
-
+const PORT = process.env.PORT || 3000; // Use environment variable or default to 3000
+server.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
