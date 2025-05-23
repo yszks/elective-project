@@ -234,7 +234,7 @@ async function createRoom() {
     if (!roomName) return;
 
     try {
-        const response = await fetch('https://www.i-bulong.com/rooms', {
+        const response = await fetch('https://www.i-bulong.com:3000/rooms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ roomName })
@@ -259,7 +259,7 @@ async function createRoom() {
 async function leaveRoom(roomId) {
     const userId = UID;
     try {
-        const response = await fetch('https://www.i-bulong.com/leave-room', {
+        const response = await fetch('https://www.i-bulong.com:3000/leave-room', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId, roomId })
