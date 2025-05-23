@@ -55,12 +55,12 @@ if (!isset($_SESSION['id'])) {
             </div>
 
             <div id="title">
-                <a href="" target="_self"><img id="theme-image" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="500px"
+                <a href="" target="_self"><img id="theme-image" src="public/assets/images/roomzy-logo-dark.png" alt="iBulong" width="500px"
                         height="auto"></a>
             </div>
 
             <div id="logo-left">
-                <a href="" target="_self"><img id="logogogo" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="180px" height="auto"></a>
+                <a href="" target="_self"><img id="logogogo" src="public/assets/images/roomzy-logo-dark.png" alt="iBulong" width="180px" height="auto"></a>
             </div>
 
             <button id="theme-toggle"></button>
@@ -84,7 +84,7 @@ if (!isset($_SESSION['id'])) {
                     <div id="side-chat">
                         <div class="inputs-uu">
                             <button id="x-btn-chat">
-                                <img src="assets/images/x-dark.png" alt="close"
+                                <img src="public/assets/images/x-dark.png" alt="close"
                                     style="width: 15px; height: auto; margin-right: 10px; pointer-events: none; ">
                             </button>
                             <div id="chat-cont">
