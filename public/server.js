@@ -15,7 +15,7 @@ app.use(cors({
 app.use(bodyParser.json());
 
 const db = mysql.createConnection({
-    host: 'localhost',
+    host: 'www.i-bulong.com',
     user: 'elective',
     password: 'elective-project', 
     database: 'chat'
