@@ -147,7 +147,12 @@ async function createRoom() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ roomName })
         });
-        if (!response.ok) throw new Error('Failed to create room');
+        
+        if (!response.ok) {
+            const errorText = await response.text(); // Get the error message from the response
+            throw new Error(`Failed to create room: ${errorText}`);
+        }
+        
         const data = await response.json();
         alert(`Room created with ID: ${data.roomId}`);
         // Optionally, redirect to the new room or update the UI
@@ -156,6 +161,8 @@ async function createRoom() {
         alert('Error creating room: ' + error.message);
     }
 }
+
+
 
 async function leaveRoom(roomId) {
     const userId = UID;
@@ -199,7 +206,7 @@ async function sendMessage(message) {
 
 
 async function loadMessages() {
-    const roomId = 'yourRoomId'; // Replace with the actual room ID
+    const roomId = currentRoomId; // Use the variable that holds the current room ID
     fetch(`https://www.i-bulong.com/messages?roomId=${roomId}`)
         .then(response => {
             if (!response.ok) {
@@ -216,6 +223,8 @@ async function loadMessages() {
             // Display error message to the user
         });
 }
+
+
 
 
 // === Microphone and Camera Control ===
