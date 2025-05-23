@@ -69,5 +69,6 @@ app.post('/messages', (req, res) => {
 // Start the server
 const PORT = process.env.PORT || 3000; // Use environment variable for port
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on https://www.i-bulong.com:${PORT}`);
 });
+
