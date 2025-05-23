@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 
 // MySQL Database Connection
 const db = mysql.createConnection({
-  host: 'www.i-bulong.com',
+  host: 'localhost',
   user: 'elective',
   password: 'elective-project',
   database: 'chat'
@@ -142,7 +142,5 @@ app.post('/messages', (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running at https://www.i-bulong.com:${PORT}`);
-});
+console.log(`Server running at https://elective-project.onrender.com`);
+

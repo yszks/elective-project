@@ -1,6 +1,6 @@
 <?php
 
-$host = "www.i-bulong.com";
+$host = "localhost";
 $user = "elective";
 $password = "elective-project";
 $database = "chat";
