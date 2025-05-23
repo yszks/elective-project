@@ -3,7 +3,7 @@ session_start();
 require_once 'config.php';
 
 if (!isset($_SESSION['id'])) {
-    header("Location: login-page.php");
+    header("Location: ../index.php");
     exit();
 }
 
