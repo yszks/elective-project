@@ -10,7 +10,7 @@ const server = http.createServer(app);
 
 // Enable CORS for your frontend domain
 app.use(cors({
-  origin: 'https://www.i-bulong.com',
+  origin: '*',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
