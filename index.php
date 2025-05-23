@@ -116,9 +116,8 @@ if (!isset($_SESSION['id'])) {
     </div>
 
     <script src="AgoraRTC_N-4.23.3.js" defer></script>
-    <script src="http://localhost:3000/socket.io/socket.io.js" defer></script>
+    <script src="https://www.i-bulong.com/socket.io/socket.io.js" defer></script>
     <script src="main.js" defer></script>
-    <script src="http://localhost:3000/js/chat.js" defer></script>
     <script src="theme.js" defer></script>
 
 
