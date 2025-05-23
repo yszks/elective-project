@@ -9,7 +9,7 @@ let remoteUsers = {};  // Remote users map
 let UID;               // Local user ID
 let micPublished = false; // Track microphone status
 let isCameraOn = true; // Track camera status
-let username = 'Guest'; // Default username
+let currentRoomId = 'elective';
 
 // === Agora Video SDK ===
 async function joinAndDisplayLocalStream() {
