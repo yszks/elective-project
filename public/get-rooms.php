@@ -1,18 +1,28 @@
 <?php
-session_start();
-require_once 'config.php';
-
 header('Content-Type: application/json');
 
-$stmt = $conn->prepare("SELECT id, name FROM rooms WHERE active = 1");
-$stmt->execute();
-$result = $stmt->get_result();
+// Include the database configuration file
+require 'config.php';
+
+// Query to fetch active rooms
+$sql = "SELECT id, room_name FROM rooms";
+$result = $conn->query($sql);
 
 $rooms = [];
-while ($row = $result->fetch_assoc()) {
-    $rooms[] = $row;
+
+if ($result->num_rows > 0) {
+    // Fetch all rooms
+    while ($row = $result->fetch_assoc()) {
+        $rooms[] = [
+            'id' => $row['id'],
+            'name' => $row['room_name']
+        ];
+    }
 }
 
+// Close the database connection
+$conn->close();
+
+// Return the rooms as a JSON response
 echo json_encode($rooms);
-$stmt->close();
 ?>
