@@ -173,7 +173,7 @@ let leaveAndRemoveLocalStream = async () => {
 
 async function checkActiveRooms() {
     try {
-        const response = await fetch('get-rooms.php');
+        const response = await fetch('public/get-rooms.php');
         if (!response.ok) throw new Error('Failed to fetch rooms');
 
         const rooms = await response.json();
