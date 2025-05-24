@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '/home//home/seupbvvg4y2j/config/config.php';
 
 if (!isset($_SESSION['otp_verified']) || !isset($_SESSION['email'])) {
     header("Location: login-page.php");

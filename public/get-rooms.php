@@ -2,8 +2,7 @@
 header('Content-Type: application/json');
 
 // Include the database configuration file
-require 'config.php';
-
+require_once '/home//home/seupbvvg4y2j/config/config.php';
 // Query to fetch active rooms
 $sql = "SELECT id, room_name FROM rooms";
 $result = $conn->query($sql);
