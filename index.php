@@ -70,7 +70,7 @@ if (!isset($_SESSION['id'])) {
             </div>
 
             <div class="container-join-btn">
-                
+                <button id="create-room-btn"> Room</button>
             </div>
 
             <div class="need-wrap">
