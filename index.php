@@ -7,10 +7,8 @@ if (!isset($_SESSION['id'])) {
     exit();
 }
 
-if (!isset($_SESSION['id'])) {
-
-    $imagePath = 'public/assets/uploads/default.png';
-} else {
+$imagePath = 'public/assets/uploads/default.png';
+if (isset($_SESSION['id'])) {
     $id = $_SESSION['id'];
     $stmt = $conn->prepare("SELECT user_img FROM users WHERE id = ?");
     $stmt->bind_param("i", $id);
@@ -19,9 +17,8 @@ if (!isset($_SESSION['id'])) {
 
     if ($result->num_rows === 1) {
         $row = $result->fetch_assoc();
+        // Use null coalescing operator for cleaner default assignment
         $imagePath = 'public/assets/uploads/' . ($row['user_img'] ?? 'default.png');
-    } else {
-        $imagePath = 'public/assets/uploads/default.png';
     }
     $stmt->close();
 }

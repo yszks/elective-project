@@ -8,14 +8,12 @@ let remoteUsers = {};  // Remote users map
 let UID;               // Local user ID
 let micPublished = false; // Track microphone status
 let isCameraOn = true; // Track camera status
+let TOKEN = null;
 
 // Function to fetch Agora token from your server
-async function fetchAgoraToken(roomId) {
+async function fetchAgoraToken(roomId, uid) {
     try {
-        // We'll let Agora assign the UID initially (null), so pass 0 to the server.
-        // If you need a specific UID, you'd generate it client-side or receive it from your auth system.
-        // For simplicity, passing 0 here.
-        const response = await fetch(`https://elective-project.onrender.com/generate-agora-token?channelName=${roomId}&uid=0`); // Pass uid=0
+        const response = await fetch(`https://elective-project.onrender.com/generate-agora-token?channelName=${roomId}&uid=${uid || 0}`);
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Failed to fetch Agora token: ${errorText}`);
@@ -24,7 +22,7 @@ async function fetchAgoraToken(roomId) {
         return data.token;
     } catch (error) {
         console.error('Error fetching Agora token:', error);
-        throw error; // Propagate the error to prevent joining without a token
+        throw error;
     }
 }
 
@@ -160,6 +158,20 @@ function registerEventHandlers() {
     socket.on("disconnect", () => {
         console.log("Disconnected from Socket.IO server");
     });
+
+    // Handle incoming chat messages
+    socket.on("chat-message", (data) => {
+        appendMessage(data.username, data.message);
+    });
+
+    // Handle room updates (e.g., user joined/left)
+    socket.on("user-joined", (data) => {
+        systemMessage(`${data.username} has joined the room.`);
+    });
+
+    socket.on("user-left", (data) => {
+        systemMessage(`${data.username} has left the room.`);
+    });
 }
 
 // Handle remote users publishing tracks
@@ -191,7 +203,10 @@ async function handleUserJoined(user, mediaType) {
 
 let handleUserLeft = async (user) => {
     delete remoteUsers[user.uid];
-    document.getElementById(`user-container-${user.uid}`).remove();
+    const userContainer = document.getElementById(`user-container-${user.uid}`);
+    if (userContainer) {
+        userContainer.remove();
+    }
 }
 
 let leaveAndRemoveLocalStream = async () => {
@@ -207,13 +222,10 @@ let leaveAndRemoveLocalStream = async () => {
 
     // Socket.IO cleanup (if connected to a room)
     if (currentRoomId) {
-        // You might want to emit a 'leave-room' event to the server
-        // so the server knows the user has explicitly left.
-        // The server.js already handles `disconnect` for room cleanup,
-        // but an explicit leave event could be useful for real-time updates to others.
-        // socket.emit('leave-room', { roomId: currentRoomId, username: username });
+        socket.emit('leave-room', { roomId: currentRoomId, username: username });
         currentRoomId = null; // Clear the current room ID
     }
+
 
     // UI reset
     document.getElementById('stream-controls').style.display = 'none';
@@ -226,29 +238,29 @@ let leaveAndRemoveLocalStream = async () => {
     document.querySelector('.container-join-btn').style.display = 'flex'; // Show join buttons again
 };
 
-   async function checkActiveRooms() {
-       try {
-           const response = await fetch('public/get-rooms.php');
-           if (!response.ok) throw new Error('Failed to fetch rooms');
+async function checkActiveRooms() {
+    try {
+        const response = await fetch('public/get-rooms.php');
+        if (!response.ok) throw new Error('Failed to fetch rooms');
 
-           const rooms = await response.json();
-           const joinButtonContainer = document.querySelector('.container-join-btn');
+        const rooms = await response.json();
+        const joinButtonContainer = document.querySelector('.container-join-btn');
 
-           // Clear existing buttons
-           joinButtonContainer.innerHTML = '';
+        // Clear existing buttons
+        joinButtonContainer.innerHTML = '';
 
-           // Create a button for each active room
-           rooms.forEach(room => {
-               const button = document.createElement('button');
-               button.textContent = `Join ${room.name}`;
-               button.onclick = () => joinRoom(room.id); // Call joinRoom with the room ID
-               joinButtonContainer.appendChild(button);
-           });
-       } catch (error) {
-           console.error('Error checking active rooms:', error);
-       }
-   }
-   
+        // Create a button for each active room
+        rooms.forEach(room => {
+            const button = document.createElement('button');
+            button.textContent = `Join ${room.name}`;
+            button.onclick = () => joinRoom(room.id); // Call joinRoom with the room ID
+            joinButtonContainer.appendChild(button);
+        });
+    } catch (error) {
+        console.error('Error checking active rooms:', error);
+    }
+}
+
 
 // Call this function periodically or on page load
 setInterval(checkActiveRooms, 5000); // Check every 5 seconds
@@ -265,6 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         initializeUI();
         registerEventHandlers();
+        checkActiveRooms(); // Initial check for rooms
     } catch (error) {
         console.error("Initialization failed:", error);
         alert("Failed to fetch user data. Please log in again.");
@@ -303,7 +316,8 @@ async function createRoom() {
         const data = await response.json();
         alert(`Room created: ${data.roomName} (ID: ${data.roomId})`);
         // Automatically join the newly created room
-        joinRoom(data.roomId);
+        await joinRoom(data.roomId);
+        checkActiveRooms();
     } catch (error) {
         console.error('Error creating room:', error);
         alert('Error creating room: ' + error.message);
@@ -311,26 +325,24 @@ async function createRoom() {
 }
 
 
-
-
 async function leaveRoom(roomId) {
-    const userId = UID;
+    const userId = UID; // Assuming UID is the Agora UID which might be used on the server
     try {
         const response = await fetch('https://elective-project.onrender.com/leave-room', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId, roomId })
         });
-        if (!response.ok) throw new Error('Failed to leave room');
+        if (!response.ok) throw new Error('Failed to leave room on server');
         alert('You have left the room.');
     } catch (error) {
         console.error('Error leaving room:', error);
         alert('Error leaving room: ' + error.message);
     }
+    // Also trigger the local Agora and UI cleanup
+    leaveAndRemoveLocalStream();
 }
 
-
-// === Chat Functions ===
 // === Chat Functions ===
 function sendMessage(roomId, username, message) {
     fetch('https://elective-project.onrender.com/messages', { // Changed to absolute URL
@@ -340,7 +352,7 @@ function sendMessage(roomId, username, message) {
     })
         .then(res => {
             if (!res.ok) throw new Error("Failed to send message");
-            appendMessage(username, message);
+            // No longer appending directly here, let the socket.on("chat-message") handle it
         })
         .catch(err => console.error("Error sending message:", err));
 }
@@ -350,9 +362,9 @@ function loadMessages(roomId) {
         .then(response => response.json())
         .then(messages => {
             const messagesContainer = document.getElementById("messages");
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            messagesContainer.innerHTML = '';
+            messagesContainer.innerHTML = ''; // Clear previous messages
             messages.forEach(msg => appendMessage(msg.username, msg.message));
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
         })
         .catch(err => console.error("Error loading messages:", err));
 }
@@ -362,6 +374,7 @@ function appendMessage(sender, message) {
     const messageElement = document.createElement("div");
     messageElement.textContent = `${sender}: ${message}`;
     messagesContainer.appendChild(messageElement);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
 }
 
 function systemMessage(msg) {
@@ -370,6 +383,7 @@ function systemMessage(msg) {
     messageElement.classList.add("system-message");
     messageElement.textContent = msg;
     messagesContainer.appendChild(messageElement);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
 }
 
 
@@ -429,14 +443,7 @@ let toggleCamera = async (e) => {
 
 // === Event Listeners ===
 window.addEventListener('load', () => {
-    const joinBtn = document.getElementById('join-btn');
-    if (joinBtn) {
-        joinBtn.addEventListener('click', () => {
-            if (currentRoomId) joinRoom(currentRoomId);
-        });
-    }
-
-
+    
     document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream);
     document.getElementById('mic-btn').addEventListener('click', toggleMic);
     document.getElementById('camera-btn').addEventListener('click', toggleCamera);
