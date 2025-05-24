@@ -9,6 +9,25 @@ let UID;               // Local user ID
 let micPublished = false; // Track microphone status
 let isCameraOn = true; // Track camera status
 
+// Function to fetch Agora token from your server
+async function fetchAgoraToken(roomId) {
+    try {
+        // We'll let Agora assign the UID initially (null), so pass 0 to the server.
+        // If you need a specific UID, you'd generate it client-side or receive it from your auth system.
+        // For simplicity, passing 0 here.
+        const response = await fetch(`https://elective-project.onrender.com/generate-agora-token?channelName=${roomId}&uid=0`); // Pass uid=0
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch Agora token: ${errorText}`);
+        }
+        const data = await response.json();
+        return data.token;
+    } catch (error) {
+        console.error('Error fetching Agora token:', error);
+        throw error; // Propagate the error to prevent joining without a token
+    }
+}
+
 // === Agora Video SDK ===
 async function joinAndDisplayLocalStream(roomId) {
     if (!roomId) {
