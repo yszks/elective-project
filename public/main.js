@@ -316,14 +316,13 @@ async function fetchUsername() {
 
 // === create room ===
 async function createRoom() {
-    // IMPORTANT: Use a custom modal or message box instead of prompt()
-    // For now, I'll keep prompt as per your original code, but consider replacing it.
+    
     const roomName = prompt("Enter room name:");
     if (!roomName) return;
 
     try {
         // Use API_BASE_URL for the fetch call
-        const response = await fetch(`${API_BASE_URL}/rooms`, {
+        const response = await fetch(`${API_BASE_URL}/public/create-room.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ roomName })
