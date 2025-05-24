@@ -1,0 +1,17 @@
+{
+    "name": "allys/elective-project",
+    "autoload": {
+        "psr-4": {
+            "Allys\\ElectiveProject\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Allyssa Bautista",
+            "email": "allyssabautista025@gmail.com"
+        }
+    ],
+    "require": {
+        "peterujah/php-agora-tokens": "^1.1"
+    }
+}

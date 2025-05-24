@@ -112,6 +112,11 @@ if (isset($_SESSION['id'])) {
         </footer>
     </div>
 
+    <script>
+        window.AGORA_APP_ID = "<?php echo getenv('AGORA_APP_ID'); ?>";
+        window.API_BASE_URL = "<?php echo getenv('API_BASE_URL'); ?>";
+    </script>
+
     <script src="public/AgoraRTC_N-4.23.3.js" defer></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="public/main.js" defer></script>

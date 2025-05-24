@@ -1,19 +1,21 @@
 // Agora Video SDK credentials
-const APP_ID = "384b88429f6c4934bd13dae2a9c2a5ab";
+const APP_ID = window.AGORA_APP_ID;
+const API_BASE_URL = window.API_BASE_URL;
 
 let currentRoomId = null;
-let client;           // AgoraRTC client
-let localTracks = [];  // Microphone and Camera tracks
-let remoteUsers = {};  // Remote users map
-let UID;               // Local user ID
-let micPublished = false; // Track microphone status
-let isCameraOn = true; // Track camera status
+let client;          
+let localTracks = []; 
+let remoteUsers = {};  
+let UID;              
+let micPublished = false; 
+let isCameraOn = true; 
 let TOKEN = null;
 
 // Function to fetch Agora token from your server
 async function fetchAgoraToken(roomId, uid) {
     try {
-        const response = await fetch(`https://elective-project.onrender.com/generate-agora-token?channelName=${roomId}&uid=${uid || 0}`);
+        // Use API_BASE_URL for the fetch call
+        const response = await fetch(`${API_BASE_URL}/generate-agora-token?channelName=${roomId}&uid=${uid || 0}`);
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Failed to fetch Agora token: ${errorText}`);
@@ -40,7 +42,7 @@ async function joinAndDisplayLocalStream(roomId) {
     client.on('user-left', handleUserLeft);
 
     // Use the dynamic roomId here
-    UID = await client.join(APP_ID, roomId, TOKEN, null);
+    UID = await client.join(APP_ID, roomId, TOKEN, null); // APP_ID is now from window.AGORA_APP_ID
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks({
         audio: {
             echoCancellation: true,
@@ -142,6 +144,7 @@ function initializeUI() {
 }
 
 
+
 // Modify joinRoom to also trigger Agora.io stream
 function joinRoom(roomId) {
     currentRoomId = roomId;
@@ -149,6 +152,7 @@ function joinRoom(roomId) {
     joinAndDisplayLocalStream(roomId); // Call Agora.io stream
     loadMessages(roomId); // Load messages after socket join
 }
+
 
 function registerEventHandlers() {
     socket.on("connect", () => {
@@ -240,7 +244,8 @@ let leaveAndRemoveLocalStream = async () => {
 
 async function checkActiveRooms() {
     try {
-        const response = await fetch('public/get-rooms.php');
+        // Use API_BASE_URL for the fetch call
+        const response = await fetch(`${API_BASE_URL}/public/get-rooms.php`); // Assuming get-rooms.php is relative to API_BASE_URL
         if (!response.ok) throw new Error('Failed to fetch rooms');
 
         const rooms = await response.json();
@@ -266,12 +271,13 @@ async function checkActiveRooms() {
 setInterval(checkActiveRooms, 5000); // Check every 5 seconds
 
 
-const socket = io("https://elective-project.onrender.com");
+const socket = io(API_BASE_URL);
 
 let username = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        // Use API_BASE_URL for the fetch call
         const userData = await fetchUsername();
         username = userData.username;
 
@@ -280,13 +286,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         checkActiveRooms(); // Initial check for rooms
     } catch (error) {
         console.error("Initialization failed:", error);
-        alert("Failed to fetch user data. Please log in again.");
-        window.location.href = "public/login-page.php";
+
+        const messageBox = document.createElement('div');
+        messageBox.textContent = "Failed to fetch user data. Please log in again.";
+        messageBox.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+            padding: 15px; border-radius: 5px; z-index: 1000;
+        `;
+        document.body.appendChild(messageBox);
+        setTimeout(() => {
+            messageBox.remove();
+            window.location.href = "public/login-page.php";
+        }, 3000); // Display for 3 seconds then redirect
     }
 });
 
 async function fetchUsername() {
-    const response = await fetch('public/get-username.php', {
+    // Use API_BASE_URL for the fetch call
+    const response = await fetch(`${API_BASE_URL}/public/get-username.php`, { // Assuming get-username.php is relative to API_BASE_URL
         credentials: 'include'
     });
     if (!response.ok) {
@@ -298,11 +316,14 @@ async function fetchUsername() {
 
 // === create room ===
 async function createRoom() {
+    // IMPORTANT: Use a custom modal or message box instead of prompt()
+    // For now, I'll keep prompt as per your original code, but consider replacing it.
     const roomName = prompt("Enter room name:");
     if (!roomName) return;
 
     try {
-        const response = await fetch('https://elective-project.onrender.com/rooms', {
+        // Use API_BASE_URL for the fetch call
+        const response = await fetch(`${API_BASE_URL}/rooms`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ roomName })
@@ -314,30 +335,69 @@ async function createRoom() {
         }
 
         const data = await response.json();
-        alert(`Room created: ${data.roomName} (ID: ${data.roomId})`);
+        // IMPORTANT: Use a custom modal or message box instead of alert()
+        // alert(`Room created: ${data.roomName} (ID: ${data.roomId})`);
+        const messageBox = document.createElement('div');
+        messageBox.textContent = `Room created: ${data.roomName} (ID: ${data.roomId})`;
+        messageBox.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+            padding: 15px; border-radius: 5px; z-index: 1000;
+        `;
+        document.body.appendChild(messageBox);
+        setTimeout(() => messageBox.remove(), 3000); // Hide after 3 seconds
+
         // Automatically join the newly created room
         await joinRoom(data.roomId);
         checkActiveRooms();
     } catch (error) {
         console.error('Error creating room:', error);
-        alert('Error creating room: ' + error.message);
+
+        const messageBox = document.createElement('div');
+        messageBox.textContent = 'Error creating room: ' + error.message;
+        messageBox.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+            padding: 15px; border-radius: 5px; z-index: 1000;
+        `;
+        document.body.appendChild(messageBox);
+        setTimeout(() => messageBox.remove(), 3000); // Hide after 3 seconds
     }
 }
 
 
 async function leaveRoom(roomId) {
-    const userId = UID; // Assuming UID is the Agora UID which might be used on the server
+    const userId = UID; 
     try {
-        const response = await fetch('https://elective-project.onrender.com/leave-room', {
+        // Use API_BASE_URL for the fetch call
+        const response = await fetch(`${API_BASE_URL}/leave-room`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId, roomId })
         });
         if (!response.ok) throw new Error('Failed to leave room on server');
-        alert('You have left the room.');
+ 
+        const messageBox = document.createElement('div');
+        messageBox.textContent = 'You have left the room.';
+        messageBox.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+            padding: 15px; border-radius: 5px; z-index: 1000;
+        `;
+        document.body.appendChild(messageBox);
+        setTimeout(() => messageBox.remove(), 3000); 
+
     } catch (error) {
         console.error('Error leaving room:', error);
-        alert('Error leaving room: ' + error.message);
+        const messageBox = document.createElement('div');
+        messageBox.textContent = 'Error leaving room: ' + error.message;
+        messageBox.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+            padding: 15px; border-radius: 5px; z-index: 1000;
+        `;
+        document.body.appendChild(messageBox);
+        setTimeout(() => messageBox.remove(), 3000); // Hide after 3 seconds
     }
     // Also trigger the local Agora and UI cleanup
     leaveAndRemoveLocalStream();
@@ -345,7 +405,8 @@ async function leaveRoom(roomId) {
 
 // === Chat Functions ===
 function sendMessage(roomId, username, message) {
-    fetch('https://elective-project.onrender.com/messages', { // Changed to absolute URL
+    // Use API_BASE_URL for the fetch call
+    fetch(`${API_BASE_URL}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId, username, message })
@@ -358,7 +419,8 @@ function sendMessage(roomId, username, message) {
 }
 
 function loadMessages(roomId) {
-    fetch(`https://elective-project.onrender.com/messages?roomId=${roomId}`) // Changed to absolute URL
+    // Use API_BASE_URL for the fetch call
+    fetch(`${API_BASE_URL}/messages?roomId=${roomId}`)
         .then(response => response.json())
         .then(messages => {
             const messagesContainer = document.getElementById("messages");
@@ -443,7 +505,7 @@ let toggleCamera = async (e) => {
 
 // === Event Listeners ===
 window.addEventListener('load', () => {
-    
+
     document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream);
     document.getElementById('mic-btn').addEventListener('click', toggleMic);
     document.getElementById('camera-btn').addEventListener('click', toggleCamera);

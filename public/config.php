@@ -1,6 +1,6 @@
 <?php
 
-$host = getenv('DB_HOST') ?: '184.168.112.74';
+$host = getenv('DB_HOST') ?: 'www.i-bulong.com';
 $user = getenv('DB_USER') ?: 'elective';
 $password = getenv('DB_PASSWORD') ?: 'elective-project';
 $database = getenv('DB_NAME') ?: 'chat';

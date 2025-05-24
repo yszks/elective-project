@@ -2,6 +2,9 @@
 session_start();
 header('Content-Type: application/json');
 
+$appId = getenv('AGORA_APP_ID');
+$appCertificate = getenv('AGORA_APP_CERTIFICATE');
+
 if (isset($_SESSION['username'])) {
     echo json_encode(['username' => $_SESSION['username']]);
 } else {

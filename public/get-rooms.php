@@ -4,6 +4,9 @@ header('Content-Type: application/json');
 // Include the database configuration file
 require_once '/home/seupbvvg4y2j/config/config.php';
 
+$appId = getenv('AGORA_APP_ID');
+$appCertificate = getenv('AGORA_APP_CERTIFICATE');
+
 $rooms = [];
 
 try {
