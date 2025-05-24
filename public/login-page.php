@@ -37,7 +37,7 @@ function isActiveForm($formName, $activeForm)
 <body>
     <div class="main-container">
         <div id="pic-logo">
-            <img id="theme-image" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="700px" height="auto">
+            <img id="theme-login" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="700px" height="auto">
         </div>
         <button id="theme-toggle"></button>
 
