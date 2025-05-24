@@ -2,7 +2,7 @@
 session_start();
 require_once '/home/seupbvvg4y2j/config/config.php';
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['id'])) {
     header("Location: public/login-page.php");
     exit();
 }
