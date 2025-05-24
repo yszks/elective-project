@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error("Initialization failed:", error);
         alert("Failed to fetch user data. Please log in again.");
-        window.location.href = "login-page.php";
+        window.location.href = "public/login-page.php";
     }
 });
 
