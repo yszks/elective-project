@@ -128,10 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
     <div class="profile-container">
         <button id="theme-toggle"></button>
 
-        <a href="index.php" target="_self"><button style="top: 10px; left:20px; display: grid; position: fixed;">← Return to Homepage</button></a>
+        <a href="../index.php" target="_self"><button style="top: 10px; left:20px; display: grid; position: fixed;">← Return to Homepage</button></a>
 
         <div id="title-profile">
-            <img id="theme-image" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="400px" height="auto">
+            <img id="theme-login" src="assets/images/roomzy-logo-dark.png" alt="iBulong" width="400px" height="auto">
         </div>
 
         <?php if (isset($_SESSION['profile_update'])): ?>
