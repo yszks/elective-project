@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '/home//home/seupbvvg4y2j/config/config.php';
+require_once '/home/seupbvvg4y2j/config/config.php';
 
 if (!isset($_SESSION['id'])) {
     header("Location: login-page.php");

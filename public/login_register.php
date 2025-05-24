@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '/home/seupbvvg4y2j/config/config.php';
 
 
 if (isset($_POST['active_form'])) {
