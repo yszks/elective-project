@@ -113,8 +113,8 @@ if (isset($_SESSION['id'])) {
     </div>
 
     <script>
-        window.AGORA_APP_ID = "<?php echo getenv('AGORA_APP_ID'); ?>";
-        window.API_BASE_URL = "<?php echo getenv('API_BASE_URL'); ?>";
+        window.AGORA_APP_ID = "384b88429f6c4934bd13dae2a9c2a5ab";
+        window.API_BASE_URL = "https://elective-project.onrender.com";
     </script>
 
     <script src="public/AgoraRTC_N-4.23.3.js" defer></script>
