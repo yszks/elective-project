@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function fetchUsername() {
-    const response = await fetch('get-username.php', {
+    const response = await fetch('public/get-username.php', {
         credentials: 'include'
     });
     if (!response.ok) {
