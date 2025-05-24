@@ -116,7 +116,7 @@ function isActiveForm($formName, $activeForm)
     unset($_SESSION['forgot_error']);
     unset($_SESSION['otp_error']);
     unset($_SESSION['reset_error']);
-    // DO NOT unset $_SESSION['active_form']
+    unset($_SESSION['active_form']);
     ?>
 </body>
 

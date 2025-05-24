@@ -39,7 +39,7 @@ window.onload = () => {
                 if (registForm) registForm.style.backgroundColor = '#69a0f9';
             } else {
                 if (themeImage) themeImage.src = 'public/assets/images/roomzy-logo-dark.png';
-                if (themelogin) themelogin.src = 'public/assets/images/roomzy-logo-dark.png';
+                if (themelogin) themelogin.src = 'assets/images/roomzy-logo-dark.png';
                 if (logo) logo.src = 'public/assets/images/roomzy-logo-dark.png';
                 toggleBtn.style.backgroundColor = '#0C0C0C';
                 if (sideChat) sideChat.style.backgroundColor = '#242424';
