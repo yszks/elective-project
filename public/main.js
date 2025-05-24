@@ -228,7 +228,7 @@ let leaveAndRemoveLocalStream = async () => {
 
    async function checkActiveRooms() {
        try {
-           const response = await fetch('public/get-rooms.php');
+           const response = await fetch('get-rooms.php');
            if (!response.ok) throw new Error('Failed to fetch rooms');
 
            const rooms = await response.json();
@@ -268,12 +268,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error("Initialization failed:", error);
         alert("Failed to fetch user data. Please log in again.");
-        window.location.href = "public/login-page.php";
+        window.location.href = "login-page.php";
     }
 });
 
 async function fetchUsername() {
-    const response = await fetch('public/get-username.php', {
+    const response = await fetch('get-username.php', {
         credentials: 'include'
     });
     if (!response.ok) {
@@ -390,7 +390,7 @@ let toggleMic = async (e) => {
         await micTrack.setMuted(false);
         console.log("Mic unmuted");
         button.innerHTML = `
-            <img src="public/assets/images/mic-on.png" alt="Mic On" class="mic-icon">
+            <img src="assets/images/mic-on.png" alt="Mic On" class="mic-icon">
         `;
         button.style.backgroundColor = '#242424';
         document.getElementById('mute-icon').style.display = 'none';
@@ -398,7 +398,7 @@ let toggleMic = async (e) => {
         await micTrack.setMuted(true);
         console.log("Mic muted");
         button.innerHTML = `
-            <img src="public/assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
+            <img src="assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
         `;
         button.style.backgroundColor = '#FF8578';
         document.getElementById('mute-icon').style.display = 'flex';
@@ -412,14 +412,14 @@ let toggleCamera = async (e) => {
         await localTracks[1].setMuted(false);
         isCameraOn = true;
         button.innerHTML = `
-            <img src="public/assets/images/camera-on.png" alt="Camera On" class="camera-icon">
+            <img src="assets/images/camera-on.png" alt="Camera On" class="camera-icon">
         `;
         button.style.backgroundColor = '#A1FF99';
     } else {
         await localTracks[1].setMuted(true);
         isCameraOn = false;
         button.innerHTML = `
-            <img src="public/assets/images/camera-off.png" alt="Camera Off" class="camera-icon">
+            <img src="assets/images/camera-off.png" alt="Camera Off" class="camera-icon">
         `;
         button.style.backgroundColor = '#242424';
     }
