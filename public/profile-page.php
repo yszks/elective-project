@@ -1,5 +1,9 @@
 <?php
 session_start();
+
+error_reporting(E_ALL); ini_set('display_errors', 1); // Temporarily for debug
+echo "DEBUG: Session ID: " . ($_SESSION['id'] ?? 'NOT SET') . "<br>";
+
 require_once '/home/seupbvvg4y2j/config/config.php';
 
 if (!isset($_SESSION['id'])) {
