@@ -142,30 +142,30 @@ io.on('connection', (socket) => {
     });
 
     socket.on('send-message', ({ roomId, username, message }) => {
-    console.log(`Message from ${username} in room ${roomId}: ${message}`);
+        console.log(`Message from ${username} in room ${roomId}: ${message}`);
 
-    db.query('SELECT id FROM users WHERE username = ?', [username], (err, userResults) => {
-        if (err || userResults.length === 0) {
-            console.error('Error finding user to save message:', err || 'User not found');
-            return; 
-        }
-        const userId = userResults[0].id;
-
-        db.query(
-            'INSERT INTO messages (user_id, message, room_id, timestamp) VALUES (?, ?, ?, NOW())',
-            [userId, message, roomId],
-            (insertErr) => {
-                if (insertErr) {
-                    console.error('Error saving message to DB:', insertErr.message);
-                    return;
-                }
-
-                // **If saving is successful, THEN broadcast the message**
-                io.to(roomId).emit('chat-message', { username, message });
+        db.query('SELECT id FROM users WHERE username = ?', [username], (err, userResults) => {
+            if (err || userResults.length === 0) {
+                console.error('Error finding user to save message:', err || 'User not found');
+                return;
             }
-        );
+            const userId = userResults[0].id;
+
+            db.query(
+                'INSERT INTO messages (user_id, message, room_id, timestamp) VALUES (?, ?, ?, NOW())',
+                [userId, message, roomId],
+                (insertErr) => {
+                    if (insertErr) {
+                        console.error('Error saving message to DB:', insertErr.message);
+                        return;
+                    }
+
+                    // **If saving is successful, THEN broadcast the message**
+                    io.to(roomId).emit('chat-message', { username, message });
+                }
+            );
+        });
     });
-});
 
     socket.on('leave-room', ({ roomId, username }) => {
         socket.leave(roomId);
@@ -173,6 +173,7 @@ io.on('connection', (socket) => {
 
         if (roomId && roomUserMap[roomId]) {
             roomUserMap[roomId].delete(socket.id);
+
             io.to(roomId).emit('user-left', { username });
 
             // Check if the room is now empty after this user left
@@ -188,8 +189,12 @@ io.on('connection', (socket) => {
 
                 // Delete the room itself
                 db.query('DELETE FROM rooms WHERE id = ?', [roomId], (err) => {
-                    if (err) console.error(`Failed to delete room ${roomId}:`, err.message);
-                    else console.log(`Room ${roomId} deleted.`);
+                    if (err) {
+                        console.error(`Failed to delete room ${roomId}:`, err.message);
+                    } else {
+                        console.log(`Room ${roomId} deleted.`);
+                        io.emit('leave-room', { roomId: roomId });
+                    }
                 });
             }
         }

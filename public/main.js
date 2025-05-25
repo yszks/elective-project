@@ -232,6 +232,11 @@ function registerEventHandlers() {
     socket.on("user-left", (data) => {
         systemMessage(`${data.username} has left the room.`);
     });
+
+    socket.on('leave-room', ({ roomId }) => {
+        console.log(`Received room-deleted event for room: ${roomId}. Updating UI.`);
+        checkActiveRooms();
+    });
 }
 
 // Handle remote users publishing tracks
@@ -419,12 +424,6 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
     // 1. Leave Agora Channel
     if (client && UID !== null) { // Check if client is initialized AND user has joined an Agora channel
         console.log("Leaving Agora channel...");
-
-        console.log("DEBUG: isErrorCleanup =", isErrorCleanup);
-        console.log("DEBUG: socket object =", socket);
-        console.log("DEBUG: socket.connected =", socket ? socket.connected : "N/A - socket is null/undefined");
-        console.log("DEBUG: currentRoomId =", currentRoomId);
-        console.log("DEBUG: username =", username);
 
         // Unpublish and close local tracks using properties
         if (localTracks.audioTrack && typeof localTracks.audioTrack.close === 'function') { // Check if track is an object and has close method
