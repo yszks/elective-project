@@ -180,6 +180,7 @@ body.light-theme #theme-toggle::after {
     font-size: 16px;
     padding: 12px;
     outline: none;
+    font-family: 'zabal';
 }
 
 #picture-change{
