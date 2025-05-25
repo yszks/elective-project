@@ -2,15 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once '/home/seupbvvg4y2j/config/config.php';
-
-// Ensure database connection is established (from config.php)
-// Example: $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT);
-// if ($conn->connect_error) {
-//     http_response_code(500);
-//     echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
-//     exit();
-// }
+require_once dirname(__DIR__, 2) . '/config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle POST request (saving new message)
@@ -82,7 +74,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo json_encode(['error' => 'Method Not Allowed']);
 }
 
-// Close database connection (if applicable, or handled by config.php)
-// $conn->close();
 
 ?>

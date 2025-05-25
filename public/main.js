@@ -43,16 +43,13 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
     const agoraChannelName = "elective";
 
     try {
-        // Use the roomId that was passed into this function (the actual room ID)
-        TOKEN = await fetchAgoraToken(agoraChannelName, UID); // UID can be null here, it will default to 0 in fetchAgoraToken
-        console.log("Fetched Agora Token:", TOKEN); // For debugging: Check if token is valid
+        TOKEN = await fetchAgoraToken(agoraChannelName, UID);
+        console.log("Fetched Agora Token:", TOKEN); 
     } catch (error) {
         console.error("Failed to get Agora Token. Aborting join.", error);
-        // Display an error to the user if you wish, or just log
-        return; // Prevent joining if token fetch fails
+        return; 
     }
 
-    // Use the dynamic roomId here
     UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); // APP_ID is now from window.AGORA_APP_ID
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks({
         audio: {
@@ -476,7 +473,7 @@ let toggleMic = async (e) => {
         await micTrack.setMuted(false);
         console.log("Mic unmuted");
         button.innerHTML = `
-            <img src="assets/images/mic-on.png" alt="Mic On" class="mic-icon">
+            <img src="public/assets/images/mic-on.png" alt="Mic On" class="mic-icon">
         `;
         button.style.backgroundColor = '#242424';
         document.getElementById('mute-icon').style.display = 'none';
@@ -484,7 +481,7 @@ let toggleMic = async (e) => {
         await micTrack.setMuted(true);
         console.log("Mic muted");
         button.innerHTML = `
-            <img src="assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
+            <img src="public/assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
         `;
         button.style.backgroundColor = '#FF8578';
         document.getElementById('mute-icon').style.display = 'flex';
@@ -498,14 +495,14 @@ let toggleCamera = async (e) => {
         await localTracks[1].setMuted(false);
         isCameraOn = true;
         button.innerHTML = `
-            <img src="assets/images/camera-on.png" alt="Camera On" class="camera-icon">
+            <img src="public/assets/images/camera-on.png" alt="Camera On" class="camera-icon">
         `;
         button.style.backgroundColor = '#A1FF99';
     } else {
         await localTracks[1].setMuted(true);
         isCameraOn = false;
         button.innerHTML = `
-            <img src="assets/images/camera-off.png" alt="Camera Off" class="camera-icon">
+            <img src="public/assets/images/camera-off.png" alt="Camera Off" class="camera-icon">
         `;
         button.style.backgroundColor = '#242424';
     }
