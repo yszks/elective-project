@@ -309,7 +309,7 @@ async function checkActiveRooms() {
         // Create a button for each active room
         rooms.forEach(room => {
             const button = document.createElement('button');
-            button.textContent = `Join ${room.name}`;
+            button.textContent = `Join ${room.room_name}`;
             button.onclick = () => joinRoom(room.id); // Call joinRoom with the room ID
             joinButtonContainer.appendChild(button);
         });
