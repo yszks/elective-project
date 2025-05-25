@@ -458,7 +458,7 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
     document.getElementById('messages').innerHTML = '';
 
     document.getElementById('room-selection').style.display = 'block';
-    document.getElementById('chat-container').style.display = 'none';
+    document.getElementById('chat-cont').style.display = 'none';
     // document.getElementById('video-container').style.display = 'none'; // Assuming video-container is part of stream-controls or video-streams
     document.getElementById('stream-controls').style.display = 'none';
     document.getElementById('container-chat-btn').style.display = 'none';
