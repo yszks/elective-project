@@ -416,7 +416,7 @@ async function leaveRoom(roomId) {
 // === Chat Functions ===
 function sendMessage(roomId, username, message) {
     // Use API_BASE_URL for the fetch call
-    fetch(`${API_BASE_URL}/public/messages.php`, {
+    fetch(`${PHP_API_BASE_URL}/public/messages.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId, username, message })
