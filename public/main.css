@@ -163,14 +163,17 @@ body.light-theme #theme-toggle::after {
 }
 
 .save-btn{
+    display: flex;
     margin-top: 70px;
+    align-items: right;
     justify-self: right;
 }
 
 .profile-container input{
-    display: inline;
+    display: flex;
+    margin-top: -40px;
     width: 250px;
-    align-items: end;
+    justify-self: right;
     border: none;
     border-radius: 10px;
     background-color: lightgray;

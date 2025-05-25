@@ -106,6 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
         }
 
         .upload-message {
+            position: absolute;
+            justify-self: center;
             justify-content: center;
             text-align: center;
             width: 400px;
@@ -143,18 +145,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
 
         <div class="info-cont">
             <div id="text-info">
-                <p>Username:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['username']) ?>&emsp;&emsp;&emsp;&emsp;
+                <p><b>Username:</b></p>
+                <p><i>&emsp;&emsp;<?= htmlspecialchars($user['username']) ?></i>&emsp;&emsp;&emsp;&emsp;
                 <input type="text" name="upd_username" placeholder="Change Username"></p>
 
                 <p>&emsp;</p>
-                <p>Email:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['email']) ?>&emsp;&emsp;&emsp;&emsp;
+                <p><b>Email:</b></p>
+                <p><i>&emsp;&emsp;<?= htmlspecialchars($user['email']) ?></i>&emsp;&emsp;&emsp;&emsp;
                 <input type="text" name="upd_email" placeholder="Change Email"></p>
 
                 <p>&emsp;</p>
-                <p>Password:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['password']) ?>&emsp;&emsp;&emsp;&emsp;
+                <p><b>Password:</b></p>
+                <p><i>&emsp;&emsp;********************</i>&emsp;&emsp;&emsp;&emsp;
                 <input type="password" name="upd_password" placeholder="Change Password"></p>
 
                 <div class="save-btn">
