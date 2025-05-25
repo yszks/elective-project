@@ -340,13 +340,14 @@ button {
     font-family: 'zabal';
     overflow-y: scroll;
     margin-top: 500px;
-    height: 700px;
+    height: 100vh;
     overflow-x: hidden;
     width: 360px;
     display: flex;
     flex-direction: column;
     padding: 5px;
     gap: 10px;
+    flex-grow: 1;
 }
 
 #messages::-webkit-scrollbar {
@@ -369,6 +370,7 @@ button {
 
 
 #chat-cont.show {
+    height: 100%;
     flex-basis: 420px;
     pointer-events: auto;
     bottom: 0px;
@@ -406,11 +408,16 @@ button {
     transition: transform 0.4s ease-in-out;
     top: 7px;
     margin-left: 300px;
-    background-color: transparent;
+    background-color: cyan;
+    z-index: 10000;
 }
 
 #x-btn-chat.show {
     transform: translateX(0);
+}
+
+#x-btn-chat:hover {
+    cursor: pointer;
 }
 
 .speaking {
