@@ -320,20 +320,51 @@ button {
     
 }
 
-#my-message{
-    font-family: 'zabal';
-    margin-bottom: 10px;
-    background-color: palegreen;
-    border-radius: 2px;
-    padding: 5px;
+.chat-bubble{
+    display: inline-block;
+    padding: 8px;
+    border-radius: 10px;
+    word-wrap: break-word;
+    max-width: 70%;
 }
 
-#other-message{
-    font-family: 'zabal';
-    margin-bottom: 10px;
+.my-message-bubble{
+    background-color: palegreen;
+}
+
+.other-message-bubble{
     background-color: gray;
-    border-radius: 2px;
+}
+
+#messages{
+    font-family: 'zabal';
+    overflow-y: scroll;
+    margin-top: 500px;
+    height: 700px;
+    overflow-x: hidden;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
     padding: 5px;
+    gap: 10px;
+}
+
+#messages::-webkit-scrollbar {
+  display: none;
+}
+
+.my-message-row{
+    display: flex;
+    justify-content: flex-end;
+
+  
+}
+
+.other-message-row{
+    display: flex;
+    justify-content: flex-start;
+
+   
 }
 
 

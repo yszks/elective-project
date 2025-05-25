@@ -218,6 +218,10 @@ function registerEventHandlers() {
     socket.on("disconnect", () => {
         console.log("Disconnected from Socket.IO server");
     });
+    
+    socket.on("chat-message", (data) => {
+        appendMessage(data.username, data.message);
+    });
 
     socket.on("user-joined", (data) => {
         systemMessage(`${data.username} has joined the room.`);
@@ -326,9 +330,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userData = await fetchUsername();
         username = userData.username;
 
-        initializeUI();
-        registerEventHandlers();
-        checkActiveRooms(); // Initial check for rooms
     } catch (error) {
         console.error("Initialization failed:", error);
 
@@ -478,34 +479,56 @@ function loadMessages(roomId) {
             const messagesContainer = document.getElementById("messages");
             messagesContainer.innerHTML = '';
             messages.forEach(msg => appendMessage(msg.username, msg.message));
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
         })
         .catch(err => console.error("Error loading messages:", err));
 }
 
 function appendMessage(sender, message) {
     const messagesContainer = document.getElementById("messages");
+    
+    const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 1;
+    
     const messageElement = document.createElement("div");
 
+    const messageBubble = document.createElement("span"); 
+    
+
+    messageBubble.classList.add("chat-bubble");
+
     if (sender === username) { 
-        messageElement.classList.add("my-message");
-        messageElement.textContent = `You: ${message}`;
+        messageBubble.textContent = `${message}`;
+        messageElement.classList.add("my-message-row"); 
+        messageBubble.classList.add("my-message-bubble");
     } else {
-        messageElement.classList.add("other-message");
-        messageElement.textContent = `${sender}: ${message}`;
+        messageBubble.textContent = `${sender}: ${message}`;
+        messageElement.classList.add("other-message-row");
+        messageBubble.classList.add("other-message-bubble");
     }
 
-    messagesContainer.appendChild(messageElement);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    messageElement.appendChild(messageBubble); 
+    messagesContainer.appendChild(messageElement); 
+
+    if (isScrolledToBottom) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
 }
 
 function systemMessage(msg) {
     const messagesContainer = document.getElementById("messages");
+    
+    const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 1;
+    
     const messageElement = document.createElement("div"); 
-    messageElement.classList.add("system-message");
-    messageElement.textContent = msg;
+    messageElement.classList.add("system-message"); 
+    messageElement.textContent = msg; 
+
     messagesContainer.appendChild(messageElement);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    if (isScrolledToBottom) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 }
 
 
@@ -629,6 +652,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('chat-btn').addEventListener('click', toggleChat);
         document.getElementById('x-btn-chat').addEventListener('click', toggleClose);
+
 
     } catch (error) {
         console.error("Initialization failed:", error);
