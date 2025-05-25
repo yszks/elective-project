@@ -320,9 +320,20 @@ button {
     
 }
 
-#messages{
+#my-message{
     font-family: 'zabal';
-    margin-bottom: 50px;
+    margin-bottom: 10px;
+    background-color: palegreen;
+    border-radius: 2px;
+    padding: 5px;
+}
+
+#other-message{
+    font-family: 'zabal';
+    margin-bottom: 10px;
+    background-color: gray;
+    border-radius: 2px;
+    padding: 5px;
 }
 
 

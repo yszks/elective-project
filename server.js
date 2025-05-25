@@ -275,38 +275,6 @@ app.get('/messages', (req, res) => {
     });
 });
 
-// Post a new message
-app.post('/messages', (req, res) => {
-    const { username, message, roomId } = req.body;
-    if (!username || !message || !roomId) {
-        return res.status(400).json({ error: 'Missing required fields: username, message, or roomId.' });
-    }
-
-    db.query('SELECT id FROM users WHERE username = ?', [username], (err, userResults) => {
-        if (err) {
-            console.error('Error fetching user ID:', err.message);
-            return res.status(500).json({ error: 'Failed to find user ID.' });
-        }
-        if (userResults.length === 0) {
-            return res.status(404).json({ error: 'User not found for message insertion.' });
-        }
-        const userId = userResults[0].id; // Get the user_id
-
-        // --- Then, insert using user_id ---
-        db.query(
-            'INSERT INTO messages (user_id, message, room_id, timestamp) VALUES (?, ?, ?, NOW())', // Changed 'username' to 'user_id'
-            [userId, message, roomId], // Changed 'username' to 'userId'
-            (err) => {
-                if (err) {
-                    console.error('Error sending message to DB from Node.js API:', err.message); // Added Node.js API context
-                    return res.status(500).json({ error: 'Error saving message to database.' });
-                }
-                // Message saved successfully. Socket.IO will handle broadcasting.
-                res.sendStatus(200);
-            }
-        );
-    });
-});
 
 // Optional: Add a simple root endpoint for health checks on Render
 app.get('/', (req, res) => {

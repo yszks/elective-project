@@ -81,7 +81,7 @@ if (isset($_SESSION['id'])) {
                                 <img src="public/assets/images/x-dark.png" alt="close"
                                     style="width: 15px; height: auto; margin-right: 10px; pointer-events: none; ">
                             </button>
-                        <div class="inputs-uu">
+                        <div class="inputs-uu" aria-atomic="true">
                             <div id="chat-messages-container">
                                 <div id="messages"></div>
                                 <input type="text" id="chat-input" placeholder="Type a message..." />

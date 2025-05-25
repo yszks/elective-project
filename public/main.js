@@ -117,7 +117,7 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
             clearInterval(window.localVoiceDetectionInterval);
         }
         window.localVoiceDetectionInterval = setInterval(() => {
-            // Check if track is a valid object and has getVolumeLevel method before calling
+    
             if (localTracks.audioTrack && typeof localTracks.audioTrack.getVolumeLevel === 'function') {
                 const level = localTracks.audioTrack.getVolumeLevel(); // 0.0 - 1.0
                 const videoContainer = document.getElementById(`user-container-${UID}`);
@@ -145,11 +145,9 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
 
     } catch (error) {
         console.error("Agora join/publish error in joinAndDisplayLocalStream:", error);
-        // Clean up Agora state if an error occurs during join/publish
-        if (UID !== null) { // If partially joined
-            await leaveRoomAgoraAndSocket(); // Attempt to clean up
+        if (UID !== null) { 
+            await leaveRoomAgoraAndSocket(); 
         }
-        // Optionally, display a user-friendly error message
         alert("Failed to join video call. Please try again.");
     }
 }
@@ -219,10 +217,6 @@ function registerEventHandlers() {
 
     socket.on("disconnect", () => {
         console.log("Disconnected from Socket.IO server");
-    });
-
-    socket.on("chat-message", (data) => {
-        appendMessage(data.username, data.message);
     });
 
     socket.on("user-joined", (data) => {
@@ -308,10 +302,8 @@ async function checkActiveRooms() {
         const rooms = await response.json();
         const joinButtonContainer = document.querySelector('.container-join-btn');
 
-        // Clear existing buttons
         joinButtonContainer.innerHTML = '';
 
-        // Create a button for each active room
         rooms.forEach(room => {
             const button = document.createElement('button');
             button.textContent = `Join ${room.room_name}`;
@@ -494,14 +486,22 @@ function loadMessages(roomId) {
 function appendMessage(sender, message) {
     const messagesContainer = document.getElementById("messages");
     const messageElement = document.createElement("div");
-    messageElement.textContent = `${sender}: ${message}`;
+
+    if (sender === username) { 
+        messageElement.classList.add("my-message");
+        messageElement.textContent = `You: ${message}`;
+    } else {
+        messageElement.classList.add("other-message");
+        messageElement.textContent = `${sender}: ${message}`;
+    }
+
     messagesContainer.appendChild(messageElement);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 function systemMessage(msg) {
     const messagesContainer = document.getElementById("messages");
-    const messageElement = document("div");
+    const messageElement = document.createElement("div"); 
     messageElement.classList.add("system-message");
     messageElement.textContent = msg;
     messagesContainer.appendChild(messageElement);
