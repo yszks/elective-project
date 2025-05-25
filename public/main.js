@@ -430,7 +430,7 @@ function sendMessage(roomId, username, message) {
 
 function loadMessages(roomId) {
     // Use API_BASE_URL for the fetch call
-    fetch(`<span class="math-inline">\{PHP\_API\_BASE\_URL\}/public/messages\.php?roomId\=</span>{roomId}`)
+     fetch(`${PHP_API_BASE_URL}/public/messages.php?roomId=${roomId}`)
         .then(response => response.json())
         .then(messages => {
             const messagesContainer = document.getElementById("messages");
