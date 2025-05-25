@@ -144,17 +144,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
         <div class="info-cont">
             <div id="text-info">
                 <p>Username:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['username']) ?>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['username']) ?>&emsp;&emsp;&emsp;&emsp;
                 <input type="text" name="upd_username" placeholder="Change Username"></p>
 
-                <p>&emsp;<br>&emsp;</p>
+                <p>&emsp;</p>
                 <p>Email:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['email']) ?>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['email']) ?>&emsp;&emsp;&emsp;&emsp;
                 <input type="text" name="upd_email" placeholder="Change Email"></p>
 
-                <p>&emsp;<br>&emsp;</p>
+                <p>&emsp;</p>
                 <p>Password:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['password']) ?>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['password']) ?>&emsp;&emsp;&emsp;&emsp;
                 <input type="password" name="upd_password" placeholder="Change Password"></p>
 
                 <div class="save-btn">

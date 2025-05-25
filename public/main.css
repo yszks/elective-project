@@ -167,6 +167,18 @@ body.light-theme #theme-toggle::after {
     justify-self: right;
 }
 
+.profile-container input{
+    display: inline;
+    width: 250px;
+    align-items: end;
+    border: none;
+    border-radius: 10px;
+    background-color: lightgray;
+    font-size: 16px;
+    padding: 12px;
+    outline: none;
+}
+
 #picture-change{
     margin-top: -60px;
 }
