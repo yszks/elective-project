@@ -297,7 +297,7 @@ let leaveAndRemoveLocalStream = async () => {
 
 async function checkActiveRooms() {
     try {
-        const response = await fetch(`${API_BASE_URL}/rooms`); 
+        const response = await fetch(`${API_BASE_URL}/rooms`);
         if (!response.ok) throw new Error('Failed to fetch rooms');
 
         const rooms = await response.json();
@@ -367,7 +367,7 @@ async function createRoom() {
     if (!roomName) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/rooms`, { 
+        const response = await fetch(`${API_BASE_URL}/rooms`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ roomName })
@@ -419,10 +419,17 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
     // 1. Leave Agora Channel
     if (client && UID !== null) { // Check if client is initialized AND user has joined an Agora channel
         console.log("Leaving Agora channel...");
+
+        console.log("DEBUG: isErrorCleanup =", isErrorCleanup);
+        console.log("DEBUG: socket object =", socket);
+        console.log("DEBUG: socket.connected =", socket ? socket.connected : "N/A - socket is null/undefined");
+        console.log("DEBUG: currentRoomId =", currentRoomId);
+        console.log("DEBUG: username =", username);
+
         // Unpublish and close local tracks using properties
         if (localTracks.audioTrack && typeof localTracks.audioTrack.close === 'function') { // Check if track is an object and has close method
             if (micPublished) { // Only unpublish if it was actually published
-                 await client.unpublish([localTracks.audioTrack]);
+                await client.unpublish([localTracks.audioTrack]);
             }
             localTracks.audioTrack.close(); // Close track to release resources
             localTracks.audioTrack = null; // Set to null for garbage collection/re-creation check
@@ -442,7 +449,6 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
         console.log("Agora client not active or not joined. Skipping Agora leave.");
     }
 
-    // 2. Emit Socket.IO leave event
     if (!isErrorCleanup && socket && currentRoomId) { // Only emit if not an error cleanup and a room exists
         socket.emit('leave-room', { roomId: currentRoomId, username });
         console.log(`Socket.IO user ${username} explicitly left room ${currentRoomId}`);
@@ -473,7 +479,7 @@ function sendMessage(roomId, username, message) {
 }
 
 function loadMessages(roomId) {
-    fetch(`${API_BASE_URL}/messages?roomId=${roomId}`) 
+    fetch(`${API_BASE_URL}/messages?roomId=${roomId}`)
         .then(response => response.json())
         .then(messages => {
             const messagesContainer = document.getElementById("messages");
@@ -529,7 +535,7 @@ let toggleMic = async (e) => {
             } catch (error) {
                 console.error("Error publishing mic: ", error);
                 alert("Failed to publish microphone. Check console.");
-     
+
                 await micTrack.setMuted(true);
                 return;
             }

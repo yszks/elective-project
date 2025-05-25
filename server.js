@@ -17,7 +17,7 @@ const server = http.createServer(app); // Create HTTP server from Express app
 const PORT = process.env.PORT || 3000;
 
 const APP_ID = process.env.AGORA_APP_ID;
-const APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE; // Highly sensitive!
+const APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE;
 
 
 const allowedOrigins = [
@@ -173,7 +173,6 @@ io.on('connection', (socket) => {
 
         if (roomId && roomUserMap[roomId]) {
             roomUserMap[roomId].delete(socket.id);
-            // Notify others that this user left
             io.to(roomId).emit('user-left', { username });
 
             // Check if the room is now empty after this user left
