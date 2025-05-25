@@ -140,18 +140,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
         <?php endif; ?>
 
         <h2>Welcome, <?= htmlspecialchars($user['username']) ?></h2>
-        
+
         <div class="info-cont">
             <div id="text-info">
-                <p>&emsp;<br>&emsp;</p>
                 <p>Username:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['username']) ?></p>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['username']) ?>
+                <input type="text" name="upd_username" placeholder="Change Username"></p>
+
                 <p>&emsp;<br>&emsp;</p>
                 <p>Email:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['email']) ?></p>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['email']) ?>
+                <input type="text" name="upd_email" placeholder="Change Email"></p>
+
                 <p>&emsp;<br>&emsp;</p>
                 <p>Password:</p>
-                <p>&emsp;&emsp;<?= htmlspecialchars($user['password']) ?></p>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['password']) ?>
+                <input type="password" name="upd_password" placeholder="Change Password"></p>
+
+                <div class="save-btn">
+                    <button type="submit" name="save_changes">Save Changes</button>
+                </div>
             </div>
 
             <form id="picture-change" method="POST" enctype="multipart/form-data" id="uploadForm">
