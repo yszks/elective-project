@@ -515,7 +515,6 @@ function systemMessage(msg) {
 let toggleMic = async (e) => {
     const button = e.currentTarget;
 
-    // More robust check: ensure track object exists and has the setMuted method
     if (!localTracks.audioTrack || typeof localTracks.audioTrack.setMuted !== 'function') {
         console.warn("Audio track not fully initialized or not a valid track object. Cannot toggle mic.");
         alert("Microphone not ready. Please try again after joining the call.");
@@ -538,7 +537,7 @@ let toggleMic = async (e) => {
             } catch (error) {
                 console.error("Error publishing mic: ", error);
                 alert("Failed to publish microphone. Check console.");
-                // If publish fails, re-mute for consistent UI state
+     
                 await micTrack.setMuted(true);
                 return;
             }
@@ -548,7 +547,6 @@ let toggleMic = async (e) => {
             <img src="public/assets/images/mic-on.png" alt="Mic On" class="mic-icon">
         `;
         button.style.backgroundColor = '#242424';
-        document.getElementById('mute-icon').style.display = 'none';
     } else {
         // Mute the track
         await micTrack.setMuted(true);
@@ -565,7 +563,6 @@ let toggleMic = async (e) => {
             <img src="public/assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
         ` ;
         button.style.backgroundColor = '#FF8578';
-        document.getElementById('mute-icon').style.display = 'flex';
     }
 };
 
