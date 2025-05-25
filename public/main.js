@@ -13,17 +13,21 @@ let TOKEN = null;
 
 // Function to fetch Agora token from your server
 async function fetchAgoraToken(roomId, uid) {
+    const url = `${API_BASE_URL}/generate-agora-token?channelName=${roomId}&uid=${uid || 0}`;
+
     try {
-        const response = await fetch(`${PHP_API_BASE_URL}/public/generate-agora-token.php?channelName=${roomId}&uid=${uid || 0}`);
+        const response = await fetch(url); 
+
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Failed to fetch Agora token: ${errorText}`);
+            console.error('Network response was not ok:', response.status, errorText); 
+            throw new Error(`Failed to fetch Agora token from Node.js: ${errorText}`);
         }
         const data = await response.json();
         return data.token;
     } catch (error) {
         console.error('Error fetching Agora token:', error);
-        throw error;
+        throw error; 
     }
 }
 
