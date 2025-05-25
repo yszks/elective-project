@@ -327,7 +327,7 @@ button {
     transition: transform 0.4s ease-in-out;
     position: fixed;
     top: 7px;
-    right: 0px;
+    right: 100px;
     background-color: transparent;
 }
 
