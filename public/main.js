@@ -257,7 +257,7 @@ let leaveAndRemoveLocalStream = async () => {
 async function checkActiveRooms() {
     try {
         // Use API_BASE_URL for the fetch call
-        const response = await fetch(`${API_BASE_URL}/public/get-rooms.php`); // Assuming get-rooms.php is relative to API_BASE_URL
+        const response = await fetch(`${PHP_API_BASE_URL}/public/get-rooms.php`); // Assuming get-rooms.php is relative to API_BASE_URL
         if (!response.ok) throw new Error('Failed to fetch rooms');
 
         const rooms = await response.json();
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function fetchUsername() {
     // Use API_BASE_URL for the fetch call
-    const response = await fetch(`${API_BASE_URL}/public/get-username.php`, { // Assuming get-username.php is relative to API_BASE_URL
+    const response = await fetch(`${PHP_API_BASE_URL}/public/get-username.php`, { // Assuming get-username.php is relative to API_BASE_URL
         credentials: 'include'
     });
     if (!response.ok) {
@@ -334,7 +334,7 @@ async function createRoom() {
 
     try {
         // Use API_BASE_URL for the fetch call
-        const response = await fetch(`${API_BASE_URL}/public/create-room.php`, {
+        const response = await fetch(`${PHP_API_BASE_URL}/public/create-room.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ roomName })
