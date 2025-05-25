@@ -29,7 +29,7 @@ async function fetchAgoraToken(roomId, uid) {
 
 // === Agora Video SDK ===
 async function joinAndDisplayLocalStream(roomIdFromDatabase) {
-    if (!roomId) {
+    if (!roomIdFromDatabase) {
         console.error("No Room ID provided to joinAndDisplayLocalStream.");
         return;
     }
