@@ -114,7 +114,7 @@ if (isset($_SESSION['id'])) {
 
     <script>
         window.AGORA_APP_ID = "384b88429f6c4934bd13dae2a9c2a5ab";
-        window.API_BASE_URL = "https://www.i-bulong.com";
+        window.API_BASE_URL = "https://elective-project.onrender.com";
     </script>
 
     <script src="public/AgoraRTC_N-4.23.3.js" defer></script>
