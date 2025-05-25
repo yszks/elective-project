@@ -221,9 +221,6 @@ function registerEventHandlers() {
         console.log("Disconnected from Socket.IO server");
     });
 
-    socket.on("chat-message", (data) => {
-        appendMessage(data.username, data.message);
-    });
 
     socket.on("user-joined", (data) => {
         systemMessage(`${data.username} has joined the room.`);
