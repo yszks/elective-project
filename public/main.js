@@ -4,8 +4,8 @@ const API_BASE_URL = window.API_BASE_URL;
 const PHP_API_BASE_URL = window.PHP_API_BASE_URL;
 
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-
 client.enableAudioVolumeIndicator(); // Enable once
+
 let localTracks = {
     audioTrack: null,
     videoTrack: null
@@ -18,6 +18,10 @@ let micPublished = false;
 let isCameraOn = true;
 let TOKEN = null;
 
+let username = null;
+const socket = io(API_BASE_URL);
+
+
 client.on('user-published', handleUserJoined);
 client.on('user-left', handleUserLeft);
 client.on('volume-indicator', volumes => {
@@ -28,13 +32,14 @@ client.on('volume-indicator', volumes => {
         const videoContainer = document.getElementById(`user-container-${uid}`);
         if (!videoContainer) return;
 
-        if (level > 40) {
+        if (level > 40) { // Agora's volume indicator is 0-255, so 40 is a good threshold
             videoContainer.style.border = "3px solid limegreen";
         } else {
             videoContainer.style.border = "";
         }
     });
 });
+
 
 // Function to fetch Agora token from your server
 async function fetchAgoraToken(roomId, uid) {
@@ -92,13 +97,13 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); // Let Agora assign UID for new joins
         console.log(`Agora client joined channel: ${agoraChannelName} with UID: ${UID}`);
 
-        // Update local video player ID to match current UID
         const localPlayerHtml = `<div class="video-container" id="user-container-${UID}">
-                                    <div class="video-player" id="user-${UID}"></div>
+                                    <div class="video-player local-video-player" id="user-${UID}"></div>
                                     <p class="username-overlay">${username}</p>
                                 </div>`;
         document.getElementById('video-streams').innerHTML = localPlayerHtml; // Clear old and add new
-        localTracks.videoTrack.play(`user-${UID}`);
+        localTracks.videoTrack.play(`user-${UID}`); // Play video track using the property
+        console.log("Local video track playing.");
 
         console.log("Attempting to publish video track.");
         await client.publish([localTracks.videoTrack]);
@@ -108,13 +113,12 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         await localTracks.audioTrack.setMuted(true);
         micPublished = false; // Ensure this flag is reset
 
-        console.log("All Agora initialization steps completed for local user.");
-
         if (window.localVoiceDetectionInterval) {
             clearInterval(window.localVoiceDetectionInterval);
         }
         window.localVoiceDetectionInterval = setInterval(() => {
-            if (localTracks.audioTrack && localTracks.audioTrack.readyState === 'live') {
+            // Check if track is a valid object and has getVolumeLevel method before calling
+            if (localTracks.audioTrack && typeof localTracks.audioTrack.getVolumeLevel === 'function') {
                 const level = localTracks.audioTrack.getVolumeLevel(); // 0.0 - 1.0
                 const videoContainer = document.getElementById(`user-container-${UID}`);
                 if (videoContainer) {
@@ -126,6 +130,7 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
                 }
             }
         }, 200);
+
 
         // Display controls after joining a room (ensure this is done after Agora join is successful)
         document.getElementById('stream-controls').style.display = 'flex';
@@ -167,20 +172,18 @@ function initializeUI() {
     const sendBtn = document.getElementById("send-btn");
     const chatInput = document.getElementById("chat-input");
 
-    // Ensure the chat input and send button are correctly wired up
     if (sendBtn && chatInput) {
         sendBtn.addEventListener("click", () => {
             const message = chatInput.value.trim();
-            if (message && currentRoomId && username) { // Added username check
+            if (message && currentRoomId && username) {
                 sendMessage(currentRoomId, username, message);
                 chatInput.value = '';
             }
         });
-        // Allow sending messages with Enter key
         chatInput.addEventListener("keypress", (event) => {
             if (event.key === "Enter") {
-                event.preventDefault(); // Prevent default Enter behavior (e.g., new line)
-                sendBtn.click(); // Trigger send button click
+                event.preventDefault();
+                sendBtn.click();
             }
         });
     }
@@ -218,12 +221,10 @@ function registerEventHandlers() {
         console.log("Disconnected from Socket.IO server");
     });
 
-    // Handle incoming chat messages
     socket.on("chat-message", (data) => {
         appendMessage(data.username, data.message);
     });
 
-    // Handle room updates (e.g., user joined/left)
     socket.on("user-joined", (data) => {
         systemMessage(`${data.username} has joined the room.`);
     });
@@ -242,6 +243,7 @@ async function handleUserJoined(user, mediaType) {
     if (mediaType === 'video') {
         let player = document.getElementById(`user-container-${user.uid}`);
         if (!player) { // Only add if container doesn't exist
+            // No 'local-video-player' class for remote users, so it won't be mirrored
             player = `<div class="video-container" id="user-container-${user.uid}">
                         <div class="video-player" id="user-${user.uid}"></div>
                         <p class="username-overlay">${user.uid}</p>
@@ -295,8 +297,7 @@ let leaveAndRemoveLocalStream = async () => {
 
 async function checkActiveRooms() {
     try {
-        // Use API_BASE_URL for the fetch call
-        const response = await fetch(`${PHP_API_BASE_URL}/public/get-rooms.php`); // Assuming get-rooms.php is relative to API_BASE_URL
+        const response = await fetch(`${PHP_API_BASE_URL}/public/get-rooms.php`); 
         if (!response.ok) throw new Error('Failed to fetch rooms');
 
         const rooms = await response.json();
@@ -321,10 +322,6 @@ async function checkActiveRooms() {
 // Call this function periodically or on page load
 setInterval(checkActiveRooms, 5000); // Check every 5 seconds
 
-
-const socket = io(API_BASE_URL);
-
-let username = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -354,8 +351,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function fetchUsername() {
-    // Use API_BASE_URL for the fetch call
-    const response = await fetch(`${PHP_API_BASE_URL}/public/get-username.php`, { // Assuming get-username.php is relative to API_BASE_URL
+    const response = await fetch(`${PHP_API_BASE_URL}/public/get-username.php`, {
         credentials: 'include'
     });
     if (!response.ok) {
@@ -367,12 +363,10 @@ async function fetchUsername() {
 
 // === create room ===
 async function createRoom() {
-
     const roomName = prompt("Enter room name:");
     if (!roomName) return;
 
     try {
-        // Use API_BASE_URL for the fetch call
         const response = await fetch(`${PHP_API_BASE_URL}/public/create-room.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -385,8 +379,6 @@ async function createRoom() {
         }
 
         const data = await response.json();
-        // IMPORTANT: Use a custom modal or message box instead of alert()
-        // alert(`Room created: ${data.roomName} (ID: ${data.roomId})`);
         const messageBox = document.createElement('div');
         messageBox.textContent = `Room created: ${data.roomName} (ID: ${data.roomId})`;
         messageBox.style.cssText = `
@@ -395,14 +387,12 @@ async function createRoom() {
             padding: 15px; border-radius: 5px; z-index: 1000;
         `;
         document.body.appendChild(messageBox);
-        setTimeout(() => messageBox.remove(), 3000); // Hide after 3 seconds
+        setTimeout(() => messageBox.remove(), 3000);
 
-        // Automatically join the newly created room
         await joinRoom(data.roomId);
         checkActiveRooms();
     } catch (error) {
         console.error('Error creating room:', error);
-
         const messageBox = document.createElement('div');
         messageBox.textContent = 'Error creating room: ' + error.message;
         messageBox.style.cssText = `
@@ -411,64 +401,76 @@ async function createRoom() {
             padding: 15px; border-radius: 5px; z-index: 1000;
         `;
         document.body.appendChild(messageBox);
-        setTimeout(() => messageBox.remove(), 3000); // Hide after 3 seconds
+        setTimeout(() => messageBox.remove(), 3000);
     }
 }
 
 
-async function leaveRoomAgoraAndSocket() {
+
+async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
     console.log("Initiating leave room process...");
 
-    console.log("Initiating leave room process...");
-    if (client && UID !== null) {
+    // Clear local voice detection interval if running
+    if (window.localVoiceDetectionInterval) {
+        clearInterval(window.localVoiceDetectionInterval);
+        window.localVoiceDetectionInterval = null;
+    }
+
+    // 1. Leave Agora Channel
+    if (client && UID !== null) { // Check if client is initialized AND user has joined an Agora channel
         console.log("Leaving Agora channel...");
         // Unpublish and close local tracks using properties
-        if (localTracks.audioTrack && localTracks.audioTrack.readyState === 'live') {
-            await client.unpublish([localTracks.audioTrack]); // Unpublish
-            localTracks.audioTrack.close(); // Close
+        if (localTracks.audioTrack && typeof localTracks.audioTrack.close === 'function') { // Check if track is an object and has close method
+            if (micPublished) { // Only unpublish if it was actually published
+                 await client.unpublish([localTracks.audioTrack]);
+            }
+            localTracks.audioTrack.close(); // Close track to release resources
             localTracks.audioTrack = null; // Set to null for garbage collection/re-creation check
             micPublished = false;
         }
-        if (localTracks.videoTrack && localTracks.videoTrack.readyState === 'live') {
+        if (localTracks.videoTrack && typeof localTracks.videoTrack.close === 'function') { // Check if track is an object and has close method
             await client.unpublish([localTracks.videoTrack]); // Unpublish
-            localTracks.videoTrack.close(); // Close
+            localTracks.videoTrack.close(); // Close track to release resources
             localTracks.videoTrack = null; // Set to null
         }
         await client.leave();
         console.log("Agora client left the channel.");
-        document.getElementById('video-streams').innerHTML = '';
-        UID = null;
+        // Clear any UI elements for local stream
+        document.getElementById('video-streams').innerHTML = ''; // Clear all video players
+        UID = null; // Reset UID
     } else {
         console.log("Agora client not active or not joined. Skipping Agora leave.");
     }
 
     // 2. Emit Socket.IO leave event
-    if (socket && currentRoomId) {
+    if (!isErrorCleanup && socket && currentRoomId) { // Only emit if not an error cleanup and a room exists
         socket.emit('leave-room', { roomId: currentRoomId, username });
         console.log(`Socket.IO user ${username} explicitly left room ${currentRoomId}`);
         currentRoomId = null; // Clear current room ID on frontend
+    } else if (isErrorCleanup) {
+        console.log("Skipping Socket.IO leave due to error cleanup.");
+        currentRoomId = null; // Clear current room ID anyway
     } else {
         console.log("Socket.IO not active or not in a room. Skipping Socket.IO leave.");
     }
 
-    // 3. Clear chat messages (optional, but good for UX)
+
     document.getElementById('messages').innerHTML = '';
 
-    // 4. Update UI to show room selection
     document.getElementById('room-selection').style.display = 'block';
     document.getElementById('chat-container').style.display = 'none';
-    document.getElementById('video-container').style.display = 'none';
+    // document.getElementById('video-container').style.display = 'none'; // Assuming video-container is part of stream-controls or video-streams
     document.getElementById('stream-controls').style.display = 'none';
     document.getElementById('container-chat-btn').style.display = 'none';
     document.getElementById('title').style.display = 'block'; // Show main title
     document.getElementById('logo-left').style.display = 'none'; // Hide left logo
     document.getElementById('head-buttons').style.display = 'flex'; // Show create/logout
     document.querySelector('.container-join-btn').style.display = 'flex'; // Show join buttons
+    document.getElementById('side-chat').style.display = 'none'; // Hide chat sidebar
 }
 
 // === Chat Functions ===
 function sendMessage(roomId, username, message) {
-    // Use API_BASE_URL for the fetch call
     fetch(`${PHP_API_BASE_URL}/public/messages.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -476,20 +478,18 @@ function sendMessage(roomId, username, message) {
     })
         .then(res => {
             if (!res.ok) throw new Error("Failed to send message");
-            // No longer appending directly here, let the socket.on("chat-message") handle it
         })
         .catch(err => console.error("Error sending message:", err));
 }
 
 function loadMessages(roomId) {
-    // Use API_BASE_URL for the fetch call
     fetch(`${PHP_API_BASE_URL}/public/messages.php?roomId=${roomId}`)
         .then(response => response.json())
         .then(messages => {
             const messagesContainer = document.getElementById("messages");
-            messagesContainer.innerHTML = ''; // Clear previous messages
+            messagesContainer.innerHTML = '';
             messages.forEach(msg => appendMessage(msg.username, msg.message));
-            messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         })
         .catch(err => console.error("Error loading messages:", err));
 }
@@ -499,16 +499,16 @@ function appendMessage(sender, message) {
     const messageElement = document.createElement("div");
     messageElement.textContent = `${sender}: ${message}`;
     messagesContainer.appendChild(messageElement);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 function systemMessage(msg) {
     const messagesContainer = document.getElementById("messages");
-    const messageElement = document.createElement("div");
+    const messageElement = document("div");
     messageElement.classList.add("system-message");
     messageElement.textContent = msg;
     messagesContainer.appendChild(messageElement);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 
@@ -517,12 +517,10 @@ function systemMessage(msg) {
 let toggleMic = async (e) => {
     const button = e.currentTarget;
 
-    console.log("toggleMic clicked. localTracks.audioTrack is:", localTracks.audioTrack);
-    if (localTracks.audioTrack) {
-        console.log("localTracks.audioTrack.readyState is:", localTracks.audioTrack.readyState);
-    }
-    if (!localTracks.audioTrack || localTracks.audioTrack.readyState !== 'live') {
-        console.warn("Audio track not available or not live. Cannot toggle mic.");
+    // More robust check: ensure track object exists and has the setMuted method
+    if (!localTracks.audioTrack || typeof localTracks.audioTrack.setMuted !== 'function') {
+        console.warn("Audio track not fully initialized or not a valid track object. Cannot toggle mic.");
+        alert("Microphone not ready. Please try again after joining the call.");
         return;
     }
 
@@ -533,10 +531,19 @@ let toggleMic = async (e) => {
         await micTrack.setMuted(false);
         console.log("Mic unmuted");
 
+        // If mic was not yet published to Agora, publish it now
         if (!micPublished) {
-            await client.publish([micTrack]); // Publish the track
-            micPublished = true;
-            console.log("Mic published to the channel.");
+            try {
+                await client.publish([micTrack]);
+                micPublished = true;
+                console.log("Mic published to the channel.");
+            } catch (error) {
+                console.error("Error publishing mic: ", error);
+                alert("Failed to publish microphone. Check console.");
+                // If publish fails, re-mute for consistent UI state
+                await micTrack.setMuted(true);
+                return;
+            }
         }
 
         button.innerHTML = `
@@ -549,37 +556,38 @@ let toggleMic = async (e) => {
         await micTrack.setMuted(true);
         console.log("Mic muted");
 
+        // Unpublish from Agora when muted to save bandwidth (optional, but good practice)
         if (micPublished) {
-            await client.unpublish([micTrack]); // Unpublish the track
+            await client.unpublish([micTrack]);
             micPublished = false;
             console.log("Mic unpublished from the channel.");
         }
 
         button.innerHTML = `
             <img src="public/assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
-        `;
+        ` ;
         button.style.backgroundColor = '#FF8578';
         document.getElementById('mute-icon').style.display = 'flex';
     }
 };
 
 let toggleCamera = async (e) => {
-    const button = e.currentTarget; // refers to the button, not the image
+    const button = e.currentTarget;
 
-    console.log("toggleCamera clicked. localTracks.videoTrack is:", localTracks.videoTrack);
-    if (localTracks.videoTrack) {
-        console.log("localTracks.videoTrack.readyState is:", localTracks.videoTrack.readyState);
-    }
-    if (!localTracks.videoTrack || localTracks.videoTrack.readyState !== 'live') {
-        console.warn("Video track not available or not live. Cannot toggle camera.");
+    // More robust check: ensure track object exists and has the setMuted method
+    if (!localTracks.videoTrack || typeof localTracks.videoTrack.setMuted !== 'function') {
+        console.warn("Video track not fully initialized or not a valid track object. Cannot toggle camera.");
+        alert("Camera not ready. Please try again after joining the call.");
         return;
     }
 
-    const videoTrack = localTracks.videoTrack; // Access by property name
+    const videoTrack = localTracks.videoTrack;
 
     if (videoTrack.muted) {
         await videoTrack.setMuted(false);
         isCameraOn = true;
+        // If you ever unpublish video on mute, you'd publish it here.
+        // For now, it's just muting/unmuting the video stream.
         button.innerHTML = `
             <img src="public/assets/images/camera-on.png" alt="Camera On" class="camera-icon">
         `;
@@ -598,23 +606,41 @@ let toggleCamera = async (e) => {
 
 
 // === Event Listeners ===
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const userData = await fetchUsername();
+        username = userData.username;
 
-    document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream);
-    document.getElementById('mic-btn').addEventListener('click', toggleMic);
-    document.getElementById('camera-btn').addEventListener('click', toggleCamera);
-    document.getElementById('send-btn').addEventListener('click', () => {
-        const msgInput = document.getElementById('chat-input');
-        const message = msgInput.value.trim();
-        if (message && currentRoomId && username) {
-            sendMessage(currentRoomId, username, message);
-            msgInput.value = '';
-        }
-    });
+        initializeUI();
+        registerEventHandlers();
+        checkActiveRooms(); // Initial check for rooms
+        setInterval(checkActiveRooms, 5000); // Check every 5 seconds
 
-    // Optionally, load messages periodically
-    setInterval(() => {
-        if (currentRoomId) loadMessages(currentRoomId);
-    }, 5000);
+        // Add event listeners for control buttons
+        document.getElementById('leave-btn').addEventListener('click', leaveRoomAgoraAndSocket);
+        document.getElementById('mic-btn').addEventListener('click', toggleMic);
+        document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 
+        //load messages periodically (if chat is visible)
+        setInterval(() => {
+            if (currentRoomId && document.getElementById('side-chat').style.display === 'block') {
+                loadMessages(currentRoomId);
+            }
+        }, 5000);
+
+    } catch (error) {
+        console.error("Initialization failed:", error);
+        const messageBox = document.createElement('div');
+        messageBox.textContent = "Failed to fetch user data. Please log in again.";
+        messageBox.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+            padding: 15px; border-radius: 5px; z-index: 1000;
+        `;
+        document.body.appendChild(messageBox);
+        setTimeout(() => {
+            messageBox.remove();
+            window.location.href = "public/login-page.php";
+        }, 3000);
+    }
 });
