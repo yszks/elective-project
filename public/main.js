@@ -1,6 +1,8 @@
 // Agora Video SDK credentials
 const APP_ID = window.AGORA_APP_ID;
 const API_BASE_URL = window.API_BASE_URL;
+const PHP_API_BASE_URL = window.PHP_API_BASE_URL;
+
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
 client.enableAudioVolumeIndicator(); // Enable once
@@ -63,12 +65,10 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
 
     const agoraChannelName = String(roomIdFromDatabase);
     console.log(`Attempting to join Agora channel: ${agoraChannelName}`);
+    
 
     try {
-        // Fetch token for the NEW channel
-        // Pass the actual UID if it's persistent, or null if Agora assigns it.
-        // If UID is global and only assigned once, pass that. If it's specific to the current channel,
-        // pass null to get a new one from Agora. `null` is usually safer for new joins.
+
         TOKEN = await fetchAgoraToken(agoraChannelName, null);
         console.log("Fetched Agora Token:", TOKEN ? "Success" : "Failed"); // Log success/failure, not token itself
         if (!TOKEN) {
@@ -76,15 +76,16 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
             return;
         }
 
-        // Create tracks only if they don't exist or were previously closed
-        if (!localTracks.audioTrack || localTracks.audioTrack.readyState !== 'live') {
-            localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
-                echoCancellation: true, noiseSuppression: true, autoGainControl: true,
-            });
-        }
-        if (!localTracks.videoTrack || localTracks.videoTrack.readyState !== 'live') {
-            localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
-        }
+        const [newAudioTrack, newVideoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks({
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+            },
+            video: true
+        });
+        localTracks.audioTrack = newAudioTrack; 
+        localTracks.videoTrack = newVideoTrack;
 
         // Join the channel - use the globally defined 'client'
         UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); // Let Agora assign UID for new joins
@@ -99,7 +100,6 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         localTracks.videoTrack.play(`user-${UID}`);
 
 
-        // Publish tracks (only publish camera at start, mic can be toggled)
         await client.publish([localTracks.videoTrack]);
         console.log("Local video track published.");
 
@@ -107,11 +107,6 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         await localTracks.audioTrack.setMuted(true);
         micPublished = false; // Ensure this flag is reset
 
-        // Publish audio track separately if you want it initially muted
-        // await client.publish([localTracks.audioTrack]); // Only publish if you want it ON by default
-
-        // Re-attach the voice detection for the local user's current track
-        // Clear previous interval to prevent multiple running
         if (window.localVoiceDetectionInterval) {
             clearInterval(window.localVoiceDetectionInterval);
         }
@@ -420,27 +415,26 @@ async function createRoom() {
 
 async function leaveRoomAgoraAndSocket() {
     console.log("Initiating leave room process...");
-    // 1. Leave Agora Channel
-    if (client && UID !== null) { // Check if client is initialized AND user has joined an Agora channel
+    
+    console.log("Initiating leave room process...");
+    if (client && UID !== null) {
         console.log("Leaving Agora channel...");
-        // Unpublish local tracks
-        if (localTracks.audioTrack && localTracks.audioTrack.readyState === 'live') { // Check if track is active
-            await client.unpublish(localTracks.audioTrack);
-            localTracks.audioTrack.close(); // Close track to release resources
-            localTracks.audioTrack = null;
+        // Unpublish and close local tracks using properties
+        if (localTracks.audioTrack && localTracks.audioTrack.readyState === 'live') {
+            await client.unpublish([localTracks.audioTrack]); // Unpublish
+            localTracks.audioTrack.close(); // Close
+            localTracks.audioTrack = null; // Set to null for garbage collection/re-creation check
             micPublished = false;
         }
-        if (localTracks.videoTrack && localTracks.videoTrack.readyState === 'live') { // Check if track is active
-            await client.unpublish(localTracks.videoTrack);
-            localTracks.videoTrack.close(); // Close track to release resources
-            localTracks.videoTrack = null;
+        if (localTracks.videoTrack && localTracks.videoTrack.readyState === 'live') {
+            await client.unpublish([localTracks.videoTrack]); // Unpublish
+            localTracks.videoTrack.close(); // Close
+            localTracks.videoTrack = null; // Set to null
         }
-        // Leave the Agora channel
         await client.leave();
         console.log("Agora client left the channel.");
-        // Clear any UI elements for local stream
-        document.getElementById('video-streams').innerHTML = ''; // Clear all video players
-        UID = null; // Reset UID
+        document.getElementById('video-streams').innerHTML = '';
+        UID = null;
     } else {
         console.log("Agora client not active or not joined. Skipping Agora leave.");
     }
@@ -520,25 +514,40 @@ function systemMessage(msg) {
 let toggleMic = async (e) => {
     const button = e.currentTarget;
 
-    if (!micPublished) {
-        await client.publish([localTracks[0]]);
-        micPublished = true;
-        console.log("Mic published to the channel.");
+    if (!localTracks.audioTrack || localTracks.audioTrack.readyState !== 'live') {
+        console.warn("Audio track not available or not live. Cannot toggle mic.");
+        return; // Exit if no valid audio track
     }
 
-    const micTrack = localTracks[0];
+    const micTrack = localTracks.audioTrack;
 
     if (micTrack.muted) {
+        // Unmute the track
         await micTrack.setMuted(false);
         console.log("Mic unmuted");
+
+        if (!micPublished) {
+            await client.publish([micTrack]); // Publish the track
+            micPublished = true;
+            console.log("Mic published to the channel.");
+        }
+
         button.innerHTML = `
             <img src="public/assets/images/mic-on.png" alt="Mic On" class="mic-icon">
         `;
         button.style.backgroundColor = '#242424';
         document.getElementById('mute-icon').style.display = 'none';
     } else {
+        // Mute the track
         await micTrack.setMuted(true);
         console.log("Mic muted");
+
+        if (micPublished) {
+            await client.unpublish([micTrack]); // Unpublish the track
+            micPublished = false;
+            console.log("Mic unpublished from the channel.");
+        }
+
         button.innerHTML = `
             <img src="public/assets/images/mic-off.png" alt="Mic Off" class="mic-icon">
         `;
@@ -550,15 +559,22 @@ let toggleMic = async (e) => {
 let toggleCamera = async (e) => {
     const button = e.currentTarget; // refers to the button, not the image
 
-    if (localTracks[1].muted) {
-        await localTracks[1].setMuted(false);
+    if (!localTracks.videoTrack || localTracks.videoTrack.readyState !== 'live') {
+        console.warn("Video track not available or not live. Cannot toggle camera.");
+        return; // Exit if no valid video track
+    }
+
+    const videoTrack = localTracks.videoTrack; // Access by property name
+
+    if (videoTrack.muted) {
+        await videoTrack.setMuted(false);
         isCameraOn = true;
         button.innerHTML = `
             <img src="public/assets/images/camera-on.png" alt="Camera On" class="camera-icon">
         `;
         button.style.backgroundColor = '#A1FF99';
     } else {
-        await localTracks[1].setMuted(true);
+        await videoTrack.setMuted(true);
         isCameraOn = false;
         button.innerHTML = `
             <img src="public/assets/images/camera-off.png" alt="Camera Off" class="camera-icon">
@@ -566,6 +582,7 @@ let toggleCamera = async (e) => {
         button.style.backgroundColor = '#242424';
     }
 };
+
 
 
 
