@@ -41,6 +41,18 @@ async function joinAndDisplayLocalStream(roomId) {
     client.on('user-published', handleUserJoined);
     client.on('user-left', handleUserLeft);
 
+     const agoraChannelName = "elective";
+
+    try {
+        // Use the roomId that was passed into this function (the actual room ID)
+        TOKEN = await fetchAgoraToken(roomId, UID); // UID can be null here, it will default to 0 in fetchAgoraToken
+        console.log("Fetched Agora Token:", TOKEN); // For debugging: Check if token is valid
+    } catch (error) {
+        console.error("Failed to get Agora Token. Aborting join.", error);
+        // Display an error to the user if you wish, or just log
+        return; // Prevent joining if token fetch fails
+    }
+
     // Use the dynamic roomId here
     UID = await client.join(APP_ID, roomId, TOKEN, null); // APP_ID is now from window.AGORA_APP_ID
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks({
