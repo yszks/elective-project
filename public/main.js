@@ -445,18 +445,20 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
         document.getElementById('video-streams').innerHTML = ''; // Clear all video players
         UID = null; // Reset UID
     } else {
-        location.reload();
+        console.log("Agora client not active or not joined. Skipping Agora leave.");
     }
 
     if (!isErrorCleanup && socket && currentRoomId) { // Only emit if not an error cleanup and a room exists
         socket.emit('leave-room', { roomId: currentRoomId, username });
         console.log(`Socket.IO user ${username} explicitly left room ${currentRoomId}`);
         currentRoomId = null; // Clear current room ID on frontend
+        location.reload();
     } else if (isErrorCleanup) {
         console.log("Skipping Socket.IO leave due to error cleanup.");
         currentRoomId = null; // Clear current room ID anyway
+        location.reload();
     } else {
-        console.log("Socket.IO not active or not in a room. Skipping Socket.IO leave.");
+        location.reload();
     }
 
 
