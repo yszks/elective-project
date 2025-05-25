@@ -140,18 +140,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
         <?php endif; ?>
 
         <h2>Welcome, <?= htmlspecialchars($user['username']) ?></h2>
+        
         <div class="info-cont">
-            <form method="POST" enctype="multipart/form-data" id="uploadForm">
+            <div id="text-info">
+                <p>&emsp;<br>&emsp;</p>
+                <p>Username:</p>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['username']) ?></p>
+                <p>&emsp;<br>&emsp;</p>
+                <p>Email:</p>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['email']) ?></p>
+                <p>&emsp;<br>&emsp;</p>
+                <p>Password:</p>
+                <p>&emsp;&emsp;<?= htmlspecialchars($user['password']) ?></p>
+            </div>
+
+            <form id="picture-change" method="POST" enctype="multipart/form-data" id="uploadForm">
                 <input type="hidden" name="profile_update" value="1">
                 <label for="adj-img" class="upload-label"></label>
                 <input type="file" name="user_img" id="adj-img" accept="image/*">
             </form>
-
-            <div id="text-info">
-                <p>Username: <?= htmlspecialchars($user['username']) ?></p>
-                <p>Email: <?= htmlspecialchars($user['email']) ?></p>
-                <p>Password: <?= htmlspecialchars($user['password']) ?></p>
-            </div>
         </div>
 
     </div>
