@@ -596,6 +596,19 @@ let toggleCamera = async (e) => {
     }
 };
 
+let toggleChat = async () => {
+    document.getElementById('chat-cont').classList.toggle('show');
+    document.getElementById('theme-toggle').classList.toggle('show');
+    document.getElementById('x-btn-chat').style.display = 'flex';
+}
+
+let toggleClose = async () => {
+    document.getElementById('chat-cont').classList.remove('show');;
+    document.getElementById('theme-toggle').classList.remove('show');
+    document.getElementById('x-btn-chat').style.display = 'none';
+
+}
+
 
 
 
@@ -614,6 +627,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('leave-btn').addEventListener('click', leaveRoomAgoraAndSocket);
         document.getElementById('mic-btn').addEventListener('click', toggleMic);
         document.getElementById('camera-btn').addEventListener('click', toggleCamera);
+
+        document.getElementById('chat-btn').addEventListener('click', toggleChat);
+        document.getElementById('x-btn-chat').addEventListener('click', toggleClose);
 
         //load messages periodically (if chat is visible)
         setInterval(() => {

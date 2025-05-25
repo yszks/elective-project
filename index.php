@@ -66,9 +66,7 @@ if (isset($_SESSION['id'])) {
                 <a href="public/logout.php" onclick="return confirm('Are you sure you want to logout?')"><button id="logout-btn">Logout</button></a>
             </div>
 
-            <div class="container-join-btn">
-                
-            </div>
+            <div class="container-join-btn"></div>
 
             <div class="need-wrap">
                 <div class="vid-main-cont">
