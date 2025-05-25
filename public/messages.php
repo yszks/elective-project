@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     $stmt->bind_param("i", $roomId);
-    if (!$stmt->execute()) { // Always good to check execute success
+    if (!$stmt->execute()) { 
         http_response_code(500);
         echo json_encode(['error' => 'Failed to execute SELECT statement: ' . $stmt->error]);
         exit();
@@ -97,7 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- End Database Fetching Logic ---
 
 } else {
-    // Method Not Allowed
     http_response_code(405);
     echo json_encode(['error' => 'Method Not Allowed']);
 }

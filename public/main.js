@@ -111,7 +111,7 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
     });
 
     // Load existing messages after successfully joining the room
-    loadMessages(roomId);
+    loadMessages(roomIdFromDatabase);
 }
 
 function initializeUI() {
