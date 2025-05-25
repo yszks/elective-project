@@ -67,15 +67,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // --- Database Fetching Logic ---
-    // Example using MySQLi
-    $stmt = $conn->prepare("SELECT username, message, timestamp FROM messages WHERE room_id = ? ORDER BY timestamp ASC");
+    $stmt = $conn->prepare("
+        SELECT m.message, m.timestamp, u.username
+        FROM messages AS m
+        INNER JOIN users AS u ON m.user_id = u.id
+        WHERE m.room_id = ?
+        ORDER BY m.timestamp ASC
+    ");
     if (!$stmt) {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to prepare statement: ' . $conn->error]);
+        echo json_encode(['error' => 'Failed to prepare SELECT statement with JOIN: ' . $conn->error]);
         exit();
     }
     $stmt->bind_param("i", $roomId);
-    $stmt->execute();
+    if (!$stmt->execute()) { // Always good to check execute success
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to execute SELECT statement: ' . $stmt->error]);
+        exit();
+    }
     $result = $stmt->get_result();
 
     $messages = [];
