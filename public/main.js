@@ -1,15 +1,38 @@
 // Agora Video SDK credentials
 const APP_ID = window.AGORA_APP_ID;
 const API_BASE_URL = window.API_BASE_URL;
+const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+
+client.enableAudioVolumeIndicator(); // Enable once
+let localTracks = {
+    audioTrack: null,
+    videoTrack: null
+};
 
 let currentRoomId = null;
-let client;
-let localTracks = [];
 let remoteUsers = {};
-let UID;
+let UID = null;
 let micPublished = false;
 let isCameraOn = true;
 let TOKEN = null;
+
+client.on('user-published', handleUserJoined);
+client.on('user-left', handleUserLeft);
+client.on('volume-indicator', volumes => {
+    volumes.forEach(user => {
+        const uid = user.uid;
+        const level = user.level;
+
+        const videoContainer = document.getElementById(`user-container-${uid}`);
+        if (!videoContainer) return;
+
+        if (level > 40) {
+            videoContainer.style.border = "3px solid limegreen";
+        } else {
+            videoContainer.style.border = "";
+        }
+    });
+});
 
 // Function to fetch Agora token from your server
 async function fetchAgoraToken(roomId, uid) {
@@ -38,84 +61,94 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         return;
     }
 
-    client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-    client.enableAudioVolumeIndicator();
-
-    client.on('user-published', handleUserJoined);
-    client.on('user-left', handleUserLeft);
-
     const agoraChannelName = String(roomIdFromDatabase);
+    console.log(`Attempting to join Agora channel: ${agoraChannelName}`);
 
     try {
-        TOKEN = await fetchAgoraToken(agoraChannelName, UID);
-        console.log("Fetched Agora Token:", TOKEN); 
-    } catch (error) {
-        console.error("Failed to get Agora Token. Aborting join.", error);
-        return; 
-    }
-
-    UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); // APP_ID is now from window.AGORA_APP_ID
-    localTracks = await AgoraRTC.createMicrophoneAndCameraTracks({
-        audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-        },
-        video: true
-    });
-
-    let player = `<div class="video-container" id="user-container-${UID}">
-                    <div class="video-player" id="user-${UID}"></div>
-                </div>`;
-    document.getElementById('video-streams').insertAdjacentHTML('beforeend', player);
-
-    localTracks[1].play(`user-${UID}`);
-    await client.publish([localTracks[1]]); // Only publish camera at start
-
-    await localTracks[0].setMuted(true); // Mute mic
-    micPublished = false;
-
-    // Display controls after joining a room
-    document.getElementById('stream-controls').style.display = 'flex';
-    document.getElementById('container-chat-btn').style.display = 'block';
-    document.getElementById('title').style.display = 'none'; // Hide main title
-    document.getElementById('logo-left').style.display = 'flex'; // Show left logo
-    document.getElementById('head-buttons').style.display = 'none'; // Hide create/logout
-    document.querySelector('.container-join-btn').style.display = 'none'; // Hide join buttons
-
-    // Voice detection - local user only
-    setInterval(() => {
-        if (!localTracks[0]) return;
-
-        const level = localTracks[0].getVolumeLevel(); // 0.0 - 1.0
-        const videoContainer = document.getElementById(`user-container-${UID}`);
-        if (!videoContainer) return;
-
-        if (level > 0.05) { // Adjusted sensitivity
-            videoContainer.style.border = "3px solid limegreen";
-        } else {
-            videoContainer.style.border = "";
+        // Fetch token for the NEW channel
+        // Pass the actual UID if it's persistent, or null if Agora assigns it.
+        // If UID is global and only assigned once, pass that. If it's specific to the current channel,
+        // pass null to get a new one from Agora. `null` is usually safer for new joins.
+        TOKEN = await fetchAgoraToken(agoraChannelName, null);
+        console.log("Fetched Agora Token:", TOKEN ? "Success" : "Failed"); // Log success/failure, not token itself
+        if (!TOKEN) {
+            console.error("Failed to get Agora Token. Aborting Agora join.");
+            return;
         }
-    }, 200);
 
-    client.on('volume-indicator', volumes => {
-        volumes.forEach(user => {
-            const uid = user.uid;
-            const level = user.level; // 0.0 - 1.0
+        // Create tracks only if they don't exist or were previously closed
+        if (!localTracks.audioTrack || localTracks.audioTrack.readyState !== 'live') {
+            localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
+                echoCancellation: true, noiseSuppression: true, autoGainControl: true,
+            });
+        }
+        if (!localTracks.videoTrack || localTracks.videoTrack.readyState !== 'live') {
+            localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
+        }
 
-            const videoContainer = document.getElementById(`user-container-${uid}`);
-            if (!videoContainer) return;
+        // Join the channel - use the globally defined 'client'
+        UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); // Let Agora assign UID for new joins
+        console.log(`Agora client joined channel: ${agoraChannelName} with UID: ${UID}`);
 
-            if (level > 40) { // Agora's volume indicator is 0-255
-                videoContainer.style.border = "3px solid limegreen";
-            } else {
-                videoContainer.style.border = "";
+        // Update local video player ID to match current UID
+        const localPlayerHtml = `<div class="video-container" id="user-container-${UID}">
+                                    <div class="video-player" id="user-${UID}"></div>
+                                    <p class="username-overlay">${username}</p>
+                                </div>`;
+        document.getElementById('video-streams').innerHTML = localPlayerHtml; // Clear old and add new
+        localTracks.videoTrack.play(`user-${UID}`);
+
+
+        // Publish tracks (only publish camera at start, mic can be toggled)
+        await client.publish([localTracks.videoTrack]);
+        console.log("Local video track published.");
+
+        // Initial mic state (muted)
+        await localTracks.audioTrack.setMuted(true);
+        micPublished = false; // Ensure this flag is reset
+
+        // Publish audio track separately if you want it initially muted
+        // await client.publish([localTracks.audioTrack]); // Only publish if you want it ON by default
+
+        // Re-attach the voice detection for the local user's current track
+        // Clear previous interval to prevent multiple running
+        if (window.localVoiceDetectionInterval) {
+            clearInterval(window.localVoiceDetectionInterval);
+        }
+        window.localVoiceDetectionInterval = setInterval(() => {
+            if (localTracks.audioTrack && localTracks.audioTrack.readyState === 'live') {
+                const level = localTracks.audioTrack.getVolumeLevel(); // 0.0 - 1.0
+                const videoContainer = document.getElementById(`user-container-${UID}`);
+                if (videoContainer) {
+                    if (level > 0.05) {
+                        videoContainer.style.border = "3px solid limegreen";
+                    } else {
+                        videoContainer.style.border = "";
+                    }
+                }
             }
-        });
-    });
+        }, 200);
 
-    // Load existing messages after successfully joining the room
-    loadMessages(roomIdFromDatabase);
+        // Display controls after joining a room (ensure this is done after Agora join is successful)
+        document.getElementById('stream-controls').style.display = 'flex';
+        document.getElementById('container-chat-btn').style.display = 'block';
+        document.getElementById('title').style.display = 'none';
+        document.getElementById('logo-left').style.display = 'flex';
+        document.getElementById('head-buttons').style.display = 'none';
+        document.querySelector('.container-join-btn').style.display = 'none';
+
+        // Load existing messages
+        loadMessages(roomIdFromDatabase);
+
+    } catch (error) {
+        console.error("Agora join/publish error in joinAndDisplayLocalStream:", error);
+        // Clean up Agora state if an error occurs during join/publish
+        if (UID !== null) { // If partially joined
+             await leaveRoomAgoraAndSocket(); // Attempt to clean up
+        }
+        // Optionally, display a user-friendly error message
+        alert("Failed to join video call. Please try again.");
+    }
 }
 
 function initializeUI() {
@@ -158,11 +191,23 @@ function initializeUI() {
 
 
 // Modify joinRoom to also trigger Agora.io stream
-function joinRoom(roomId) {
-    currentRoomId = roomId;
+async function joinRoom(roomId) {
+    if (currentRoomId && currentRoomId !== roomId) { // If already in a different room
+        console.log(`User attempting to leave room ${currentRoomId} to join ${roomId}`);
+        await leaveRoomAgoraAndSocket(); // Properly leave the previous room
+    } else if (currentRoomId === roomId) {
+        console.log(`Already in room ${roomId}. No action needed.`);
+        return; // Don't re-join if already in the same room
+    }
+
+    currentRoomId = roomId; // Set the new current room ID
     socket.emit("join-room", { roomId, username });
-    joinAndDisplayLocalStream(roomId); // Call Agora.io stream
-    loadMessages(roomId); // Load messages after socket join
+    console.log(`Socket.IO attempting to join room: ${roomId}`);
+
+    await joinAndDisplayLocalStream(roomId); // This will now prepare to join a fresh Agora channel
+    console.log(`Agora client attempting to join channel: ${roomId}`);
+
+    loadMessages(roomId);
 }
 
 
@@ -192,36 +237,32 @@ function registerEventHandlers() {
 
 // Handle remote users publishing tracks
 async function handleUserJoined(user, mediaType) {
-    remoteUsers[user.uid] = user;
     await client.subscribe(user, mediaType);
+    console.log(`User ${user.uid} published ${mediaType}`);
 
+    // If it's a new video stream, create a player for it
     if (mediaType === 'video') {
         let player = document.getElementById(`user-container-${user.uid}`);
-        if (player != null) {
-            player.remove();
+        if (!player) { // Only add if container doesn't exist
+            player = `<div class="video-container" id="user-container-${user.uid}">
+                        <div class="video-player" id="user-${user.uid}"></div>
+                        <p class="username-overlay">${user.uid}</p>
+                    </div>`; // You might need a way to get remote username here
+            document.getElementById('video-streams').insertAdjacentHTML('beforeend', player);
         }
-
-        player = `<div class="video-container" id="user-container-${user.uid}">
-                    <div class="video-player" id="user-${user.uid}"></div>
-                  </div>`;
-        document.getElementById('video-streams').insertAdjacentHTML('beforeend', player);
-
         user.videoTrack.play(`user-${user.uid}`);
-
-        // Mirror video
-        document.getElementById(`user-${user.uid}`).style.transform = 'scaleX(-1)';
     }
-
+    // If it's an audio stream, play it
     if (mediaType === 'audio') {
         user.audioTrack.play();
     }
 }
 
-let handleUserLeft = async (user) => {
-    delete remoteUsers[user.uid];
-    const userContainer = document.getElementById(`user-container-${user.uid}`);
-    if (userContainer) {
-        userContainer.remove();
+function handleUserLeft(user) {
+    console.log(`User ${user.uid} left`);
+    const playerContainer = document.getElementById(`user-container-${user.uid}`);
+    if (playerContainer) {
+        playerContainer.remove();
     }
 }
 
@@ -377,41 +418,55 @@ async function createRoom() {
 }
 
 
-async function leaveRoom(roomId) {
-    const userId = UID;
-    try {
-        // Use API_BASE_URL for the fetch call
-        const response = await fetch(`${API_BASE_URL}/leave-room`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, roomId })
-        });
-        if (!response.ok) throw new Error('Failed to leave room on server');
-
-        const messageBox = document.createElement('div');
-        messageBox.textContent = 'You have left the room.';
-        messageBox.style.cssText = `
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #d4edda; color: #155724; border: 1px solid #c3e6cb;
-            padding: 15px; border-radius: 5px; z-index: 1000;
-        `;
-        document.body.appendChild(messageBox);
-        setTimeout(() => messageBox.remove(), 3000);
-
-    } catch (error) {
-        console.error('Error leaving room:', error);
-        const messageBox = document.createElement('div');
-        messageBox.textContent = 'Error leaving room: ' + error.message;
-        messageBox.style.cssText = `
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
-            padding: 15px; border-radius: 5px; z-index: 1000;
-        `;
-        document.body.appendChild(messageBox);
-        setTimeout(() => messageBox.remove(), 3000); // Hide after 3 seconds
+async function leaveRoomAgoraAndSocket() {
+    console.log("Initiating leave room process...");
+    // 1. Leave Agora Channel
+    if (client && UID !== null) { // Check if client is initialized AND user has joined an Agora channel
+        console.log("Leaving Agora channel...");
+        // Unpublish local tracks
+        if (localTracks.audioTrack && localTracks.audioTrack.readyState === 'live') { // Check if track is active
+            await client.unpublish(localTracks.audioTrack);
+            localTracks.audioTrack.close(); // Close track to release resources
+            localTracks.audioTrack = null;
+            micPublished = false;
+        }
+        if (localTracks.videoTrack && localTracks.videoTrack.readyState === 'live') { // Check if track is active
+            await client.unpublish(localTracks.videoTrack);
+            localTracks.videoTrack.close(); // Close track to release resources
+            localTracks.videoTrack = null;
+        }
+        // Leave the Agora channel
+        await client.leave();
+        console.log("Agora client left the channel.");
+        // Clear any UI elements for local stream
+        document.getElementById('video-streams').innerHTML = ''; // Clear all video players
+        UID = null; // Reset UID
+    } else {
+        console.log("Agora client not active or not joined. Skipping Agora leave.");
     }
-    // Also trigger the local Agora and UI cleanup
-    leaveAndRemoveLocalStream();
+
+    // 2. Emit Socket.IO leave event
+    if (socket && currentRoomId) {
+        socket.emit('leave-room', { roomId: currentRoomId, username });
+        console.log(`Socket.IO user ${username} explicitly left room ${currentRoomId}`);
+        currentRoomId = null; // Clear current room ID on frontend
+    } else {
+        console.log("Socket.IO not active or not in a room. Skipping Socket.IO leave.");
+    }
+
+    // 3. Clear chat messages (optional, but good for UX)
+    document.getElementById('messages').innerHTML = '';
+
+    // 4. Update UI to show room selection
+    document.getElementById('room-selection').style.display = 'block';
+    document.getElementById('chat-container').style.display = 'none';
+    document.getElementById('video-container').style.display = 'none';
+    document.getElementById('stream-controls').style.display = 'none';
+    document.getElementById('container-chat-btn').style.display = 'none';
+    document.getElementById('title').style.display = 'block'; // Show main title
+    document.getElementById('logo-left').style.display = 'none'; // Hide left logo
+    document.getElementById('head-buttons').style.display = 'flex'; // Show create/logout
+    document.querySelector('.container-join-btn').style.display = 'flex'; // Show join buttons
 }
 
 // === Chat Functions ===
