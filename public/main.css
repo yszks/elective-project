@@ -278,8 +278,10 @@ button {
     
 }
 
-.system-message{
+#messages{
     font-family: 'zabal';
+    background-color: chartreuse;
+    border-radius: 10px;
 }
 
 
