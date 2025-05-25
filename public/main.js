@@ -40,7 +40,7 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
     client.on('user-published', handleUserJoined);
     client.on('user-left', handleUserLeft);
 
-    const agoraChannelName = "elective";
+    const agoraChannelName = String(roomIdFromDatabase);
 
     try {
         TOKEN = await fetchAgoraToken(agoraChannelName, UID);

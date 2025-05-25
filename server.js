@@ -21,7 +21,8 @@ const APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE; // Highly sensitive!
 
 
 const allowedOrigins = [
-    'https://www.i-bulong.com'
+    'https://www.i-bulong.com',
+    'https://i-bulong.com'
 ];
 
 // --- CORS Middleware Setup for Express Routes ---
@@ -52,7 +53,10 @@ const db = mysql.createConnection({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306, // Default MySQL port
-    charset: 'utf8mb4'
+    charset: 'utf8mb4',
+    waitForConnections: true, // If all connections are in use, wait for one to be released
+    connectionLimit: 10,     // Max number of connections in the pool
+    queueLimit: 0
 });
 
 // Connect to MySQL and handle initial connection errors
