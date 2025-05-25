@@ -445,7 +445,7 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
         document.getElementById('video-streams').innerHTML = ''; // Clear all video players
         UID = null; // Reset UID
     } else {
-        console.log("Agora client not active or not joined. Skipping Agora leave.");
+        location.reload();
     }
 
     if (!isErrorCleanup && socket && currentRoomId) { // Only emit if not an error cleanup and a room exists
