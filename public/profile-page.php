@@ -265,18 +265,18 @@ if (isset($_SESSION['profile_update_status'])) {
                 </p>
 
                 <p>&emsp;</p>
-                <<p><b>Current Password:</b></p>
-                    <p><i>&emsp;&emsp;********************</i></p>
-                    <input type="password" name="current_password" placeholder="Enter Current Password">
+                <p><b>Current Password:</b></p>
+                <p><i>&emsp;&emsp;********************</i></p>
+                <input type="password" name="current_password" placeholder="Enter Current Password">
 
-                    <p><b>New Password:</b></p>
-                    <input type="password" name="upd_password" placeholder="Enter New Password">
+                <p>&emsp;</p>
+                <input type="password" name="upd_password" placeholder="Enter New Password">
 
-                    <p><b>Confirm New Password:</b></p>
-                    <input type="password" name="confirm_upd_password" placeholder="Confirm New Password">
-                    <div class="save-btn">
-                        <button type="submit" name="save_changes">Save Changes</button>
-                    </div>
+                <p>&emsp;</p>
+                <input type="password" name="confirm_upd_password" placeholder="Confirm New Password">
+                <div class="save-btn">
+                    <button type="submit" name="save_changes">Save Changes</button>
+                </div>
             </div>
 
             <form id="picture-change" method="POST" enctype="multipart/form-data">
