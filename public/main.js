@@ -41,18 +41,18 @@ async function fetchAgoraToken(roomId, uid) {
     const url = `${API_BASE_URL}/generate-agora-token?channelName=${roomId}&uid=${uid || 0}`;
 
     try {
-        const response = await fetch(url); 
+        const response = await fetch(url);
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Network response was not ok:', response.status, errorText); 
+            console.error('Network response was not ok:', response.status, errorText);
             throw new Error(`Failed to fetch Agora token from Node.js: ${errorText}`);
         }
         const data = await response.json();
         return data.token;
     } catch (error) {
         console.error('Error fetching Agora token:', error);
-        throw error; 
+        throw error;
     }
 }
 
@@ -65,7 +65,7 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
 
     const agoraChannelName = String(roomIdFromDatabase);
     console.log(`Attempting to join Agora channel: ${agoraChannelName}`);
-    
+
 
     try {
 
@@ -84,8 +84,9 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
             },
             video: true
         });
-        localTracks.audioTrack = newAudioTrack; 
+        localTracks.audioTrack = newAudioTrack;
         localTracks.videoTrack = newVideoTrack;
+        console.log("Local tracks created. Audio readyState:", localTracks.audioTrack.readyState, "Video readyState:", localTracks.videoTrack.readyState);
 
         // Join the channel - use the globally defined 'client'
         UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); // Let Agora assign UID for new joins
@@ -99,13 +100,15 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         document.getElementById('video-streams').innerHTML = localPlayerHtml; // Clear old and add new
         localTracks.videoTrack.play(`user-${UID}`);
 
-
+        console.log("Attempting to publish video track.");
         await client.publish([localTracks.videoTrack]);
         console.log("Local video track published.");
 
         // Initial mic state (muted)
         await localTracks.audioTrack.setMuted(true);
         micPublished = false; // Ensure this flag is reset
+
+        console.log("All Agora initialization steps completed for local user.");
 
         if (window.localVoiceDetectionInterval) {
             clearInterval(window.localVoiceDetectionInterval);
@@ -139,7 +142,7 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         console.error("Agora join/publish error in joinAndDisplayLocalStream:", error);
         // Clean up Agora state if an error occurs during join/publish
         if (UID !== null) { // If partially joined
-             await leaveRoomAgoraAndSocket(); // Attempt to clean up
+            await leaveRoomAgoraAndSocket(); // Attempt to clean up
         }
         // Optionally, display a user-friendly error message
         alert("Failed to join video call. Please try again.");
@@ -415,7 +418,7 @@ async function createRoom() {
 
 async function leaveRoomAgoraAndSocket() {
     console.log("Initiating leave room process...");
-    
+
     console.log("Initiating leave room process...");
     if (client && UID !== null) {
         console.log("Leaving Agora channel...");
@@ -514,9 +517,13 @@ function systemMessage(msg) {
 let toggleMic = async (e) => {
     const button = e.currentTarget;
 
+    console.log("toggleMic clicked. localTracks.audioTrack is:", localTracks.audioTrack);
+    if (localTracks.audioTrack) {
+        console.log("localTracks.audioTrack.readyState is:", localTracks.audioTrack.readyState);
+    }
     if (!localTracks.audioTrack || localTracks.audioTrack.readyState !== 'live') {
         console.warn("Audio track not available or not live. Cannot toggle mic.");
-        return; // Exit if no valid audio track
+        return;
     }
 
     const micTrack = localTracks.audioTrack;
@@ -559,9 +566,13 @@ let toggleMic = async (e) => {
 let toggleCamera = async (e) => {
     const button = e.currentTarget; // refers to the button, not the image
 
+    console.log("toggleCamera clicked. localTracks.videoTrack is:", localTracks.videoTrack);
+    if (localTracks.videoTrack) {
+        console.log("localTracks.videoTrack.readyState is:", localTracks.videoTrack.readyState);
+    }
     if (!localTracks.videoTrack || localTracks.videoTrack.readyState !== 'live') {
         console.warn("Video track not available or not live. Cannot toggle camera.");
-        return; // Exit if no valid video track
+        return;
     }
 
     const videoTrack = localTracks.videoTrack; // Access by property name
