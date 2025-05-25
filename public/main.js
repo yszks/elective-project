@@ -14,7 +14,7 @@ let TOKEN = null;
 // Function to fetch Agora token from your server
 async function fetchAgoraToken(roomId, uid) {
     try {
-        const response = await fetch(`${API_BASE_URL}/public/generate-agora-token.php?channelName=${roomId}&uid=${uid || 0}`);
+        const response = await fetch(`${PHP_API_BASE_URL}/public/generate-agora-token.php?channelName=${roomId}&uid=${uid || 0}`);
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Failed to fetch Agora token: ${errorText}`);
