@@ -19,15 +19,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // --- Database Insertion Logic ---
-    // Example using MySQLi (adjust for PDO or your actual DB connection)
-    $stmt = $conn->prepare("INSERT INTO messages (room_id, username, message, timestamp) VALUES (?, ?, ?, ?)");
-    if (!$stmt) {
+    $stmt_user_id = $conn->prepare("SELECT id FROM users WHERE username = ?");
+    if (!$stmt_user_id) {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to prepare statement: ' . $conn->error]);
+        echo json_encode(['error' => 'Failed to prepare user_id statement: ' . $conn->error]);
         exit();
     }
-    $stmt->bind_param("isss", $roomId, $username, $message, $timestamp); // 'i' for int, 's' for string
+    $stmt_user_id->bind_param("s", $username);
+    $stmt_user_id->execute();
+    $result_user_id = $stmt_user_id->get_result();
+    $user_data = $result_user_id->fetch_assoc();
+    $stmt_user_id->close();
+
+    if (!$user_data) {
+        http_response_code(404); // User not found in database
+        echo json_encode(['error' => 'User not found in database.']);
+        exit();
+    }
+    $userId = $user_data['id']; 
+
+    // --- Database Insertion Logic ---
+     $stmt = $conn->prepare("INSERT INTO messages (room_id, user_id, message, timestamp) VALUES (?, ?, ?, ?)");
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to prepare message insertion statement: ' . $conn->error]);
+        exit();
+    }
+    // Change "isss" (int, string, string, string) to "iiss" (int, int, string, string)
+    $stmt->bind_param("iiss", $roomId, $userId, $message, $timestamp);
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'messageId' => $conn->insert_id]);
     } else {
