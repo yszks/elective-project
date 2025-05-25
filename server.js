@@ -27,7 +27,7 @@ const allowedOrigins = [
 // --- CORS Middleware Setup for Express Routes ---
 app.use(cors({
     origin: function (origin, callback) {
-        
+
         if (!origin) return callback(null, true);
         if (allowedOrigins.indexOf(origin) === -1) {
             const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
@@ -177,7 +177,7 @@ io.on('connection', (socket) => {
         if (joinedRoomId && roomUserMap[joinedRoomId]) {
             roomUserMap[joinedRoomId].delete(socket.id);
             if (roomUserMap[joinedRoomId].size === 0) {
-                 console.log(`Room ${joinedRoomId} is now empty due to disconnect. Initiating cleanup.`);
+                console.log(`Room ${joinedRoomId} is now empty due to disconnect. Initiating cleanup.`);
                 delete roomUserMap[joinedRoomId];
 
                 db.query('DELETE FROM messages WHERE room_id = ?', [joinedRoomId], (err) => {
@@ -231,9 +231,15 @@ app.get('/messages', (req, res) => {
         return res.status(400).json({ error: 'Room ID required' });
     }
 
-    db.query('SELECT username, message, timestamp FROM messages WHERE room_id = ? ORDER BY timestamp ASC', [roomId], (err, results) => {
+    db.query(`
+        SELECT m.message, m.timestamp, u.username
+        FROM messages AS m
+        INNER JOIN users AS u ON m.user_id = u.id
+        WHERE m.room_id = ?
+        ORDER BY m.timestamp ASC
+    `, [roomId], (err, results) => {
         if (err) {
-            console.error('Error fetching messages:', err.message);
+            console.error('Error fetching messages from Node.js API:', err.message); // Added Node.js API context
             return res.status(500).json({ error: 'Error fetching messages from database.' });
         }
         res.json(results);
@@ -247,18 +253,30 @@ app.post('/messages', (req, res) => {
         return res.status(400).json({ error: 'Missing required fields: username, message, or roomId.' });
     }
 
-    db.query(
-        'INSERT INTO messages (username, message, room_id, timestamp) VALUES (?, ?, ?, NOW())',
-        [username, message, roomId],
-        (err) => {
-            if (err) {
-                console.error('Error sending message to DB:', err.message);
-                return res.status(500).json({ error: 'Error saving message to database.' });
-            }
-            // Message saved successfully. Socket.IO will handle broadcasting.
-            res.sendStatus(200); // Or res.json({ success: true, message: 'Message received' });
+    db.query('SELECT id FROM users WHERE username = ?', [username], (err, userResults) => {
+        if (err) {
+            console.error('Error fetching user ID:', err.message);
+            return res.status(500).json({ error: 'Failed to find user ID.' });
         }
-    );
+        if (userResults.length === 0) {
+            return res.status(404).json({ error: 'User not found for message insertion.' });
+        }
+        const userId = userResults[0].id; // Get the user_id
+
+        // --- Then, insert using user_id ---
+        db.query(
+            'INSERT INTO messages (user_id, message, room_id, timestamp) VALUES (?, ?, ?, NOW())', // Changed 'username' to 'user_id'
+            [userId, message, roomId], // Changed 'username' to 'userId'
+            (err) => {
+                if (err) {
+                    console.error('Error sending message to DB from Node.js API:', err.message); // Added Node.js API context
+                    return res.status(500).json({ error: 'Error saving message to database.' });
+                }
+                // Message saved successfully. Socket.IO will handle broadcasting.
+                res.sendStatus(200);
+            }
+        );
+    });
 });
 
 // Optional: Add a simple root endpoint for health checks on Render
