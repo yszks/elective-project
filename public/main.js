@@ -606,7 +606,6 @@ let toggleClose = async () => {
     document.getElementById('chat-cont').classList.remove('show');;
     document.getElementById('theme-toggle').classList.remove('show');
     document.getElementById('x-btn-chat').style.display = 'none';
-
 }
 
 
