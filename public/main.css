@@ -163,15 +163,23 @@ body.light-theme #theme-toggle::after {
 }
 
 .save-btn{
+    position: absolute;
     display: flex;
-    margin-top: 70px;
+    margin-top: 60px;
     align-items: right;
     justify-self: right;
 }
 
-.profile-container input{
+.upd-pass{
+    height: 8px;
     display: flex;
-    margin-top: -40px;
+    margin-top: 70px;
+    gap: 53px;
+}
+
+.profile-container input{
+    display: block;
+    margin-top: -35px;
     width: 250px;
     justify-self: right;
     border: none;
@@ -180,7 +188,6 @@ body.light-theme #theme-toggle::after {
     font-size: 16px;
     padding: 12px;
     outline: none;
-    font-family: 'zabal';
 }
 
 #picture-change{
