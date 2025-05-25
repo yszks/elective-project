@@ -3,12 +3,12 @@ const APP_ID = window.AGORA_APP_ID;
 const API_BASE_URL = window.API_BASE_URL;
 
 let currentRoomId = null;
-let client;          
-let localTracks = []; 
-let remoteUsers = {};  
-let UID;              
-let micPublished = false; 
-let isCameraOn = true; 
+let client;
+let localTracks = [];
+let remoteUsers = {};
+let UID;
+let micPublished = false;
+let isCameraOn = true;
 let TOKEN = null;
 
 // Function to fetch Agora token from your server
@@ -28,7 +28,7 @@ async function fetchAgoraToken(roomId, uid) {
 }
 
 // === Agora Video SDK ===
-async function joinAndDisplayLocalStream(roomId) {
+async function joinAndDisplayLocalStream(roomIdFromDatabase) {
     if (!roomId) {
         console.error("No Room ID provided to joinAndDisplayLocalStream.");
         return;
@@ -40,11 +40,11 @@ async function joinAndDisplayLocalStream(roomId) {
     client.on('user-published', handleUserJoined);
     client.on('user-left', handleUserLeft);
 
-     const agoraChannelName = "elective";
+    const agoraChannelName = "elective";
 
     try {
         // Use the roomId that was passed into this function (the actual room ID)
-        TOKEN = await fetchAgoraToken(roomId, UID); // UID can be null here, it will default to 0 in fetchAgoraToken
+        TOKEN = await fetchAgoraToken(agoraChannelName, UID); // UID can be null here, it will default to 0 in fetchAgoraToken
         console.log("Fetched Agora Token:", TOKEN); // For debugging: Check if token is valid
     } catch (error) {
         console.error("Failed to get Agora Token. Aborting join.", error);
@@ -53,7 +53,7 @@ async function joinAndDisplayLocalStream(roomId) {
     }
 
     // Use the dynamic roomId here
-    UID = await client.join(APP_ID, roomId, TOKEN, null); // APP_ID is now from window.AGORA_APP_ID
+    UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); // APP_ID is now from window.AGORA_APP_ID
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks({
         audio: {
             echoCancellation: true,
@@ -327,7 +327,7 @@ async function fetchUsername() {
 
 // === create room ===
 async function createRoom() {
-    
+
     const roomName = prompt("Enter room name:");
     if (!roomName) return;
 
@@ -377,7 +377,7 @@ async function createRoom() {
 
 
 async function leaveRoom(roomId) {
-    const userId = UID; 
+    const userId = UID;
     try {
         // Use API_BASE_URL for the fetch call
         const response = await fetch(`${API_BASE_URL}/leave-room`, {
@@ -386,7 +386,7 @@ async function leaveRoom(roomId) {
             body: JSON.stringify({ userId, roomId })
         });
         if (!response.ok) throw new Error('Failed to leave room on server');
- 
+
         const messageBox = document.createElement('div');
         messageBox.textContent = 'You have left the room.';
         messageBox.style.cssText = `
@@ -395,7 +395,7 @@ async function leaveRoom(roomId) {
             padding: 15px; border-radius: 5px; z-index: 1000;
         `;
         document.body.appendChild(messageBox);
-        setTimeout(() => messageBox.remove(), 3000); 
+        setTimeout(() => messageBox.remove(), 3000);
 
     } catch (error) {
         console.error('Error leaving room:', error);
@@ -430,7 +430,7 @@ function sendMessage(roomId, username, message) {
 
 function loadMessages(roomId) {
     // Use API_BASE_URL for the fetch call
-     fetch(`${PHP_API_BASE_URL}/public/messages.php?roomId=${roomId}`)
+    fetch(`${PHP_API_BASE_URL}/public/messages.php?roomId=${roomId}`)
         .then(response => response.json())
         .then(messages => {
             const messagesContainer = document.getElementById("messages");
