@@ -297,7 +297,7 @@ let leaveAndRemoveLocalStream = async () => {
 
 async function checkActiveRooms() {
     try {
-        const response = await fetch(`${PHP_API_BASE_URL}/public/get-rooms.php`); 
+        const response = await fetch(`${API_BASE_URL}/rooms`); 
         if (!response.ok) throw new Error('Failed to fetch rooms');
 
         const rooms = await response.json();
@@ -367,7 +367,7 @@ async function createRoom() {
     if (!roomName) return;
 
     try {
-        const response = await fetch(`${PHP_API_BASE_URL}/public/create-room.php`, {
+        const response = await fetch(`${API_BASE_URL}/rooms`, { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ roomName })
@@ -469,19 +469,11 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
 
 // === Chat Functions ===
 function sendMessage(roomId, username, message) {
-    fetch(`${PHP_API_BASE_URL}/public/messages.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId, username, message })
-    })
-        .then(res => {
-            if (!res.ok) throw new Error("Failed to send message");
-        })
-        .catch(err => console.error("Error sending message:", err));
+    socket.emit('send-message', { roomId, username, message });
 }
 
 function loadMessages(roomId) {
-    fetch(`${PHP_API_BASE_URL}/public/messages.php?roomId=${roomId}`)
+    fetch(`${API_BASE_URL}/messages?roomId=${roomId}`) 
         .then(response => response.json())
         .then(messages => {
             const messagesContainer = document.getElementById("messages");

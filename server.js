@@ -142,9 +142,30 @@ io.on('connection', (socket) => {
     });
 
     socket.on('send-message', ({ roomId, username, message }) => {
-        io.to(roomId).emit('chat-message', { username, message });
-        console.log(`Message from ${username} in room ${roomId}: ${message}`);
+    console.log(`Message from ${username} in room ${roomId}: ${message}`);
+
+    db.query('SELECT id FROM users WHERE username = ?', [username], (err, userResults) => {
+        if (err || userResults.length === 0) {
+            console.error('Error finding user to save message:', err || 'User not found');
+            return; 
+        }
+        const userId = userResults[0].id;
+
+        db.query(
+            'INSERT INTO messages (user_id, message, room_id, timestamp) VALUES (?, ?, ?, NOW())',
+            [userId, message, roomId],
+            (insertErr) => {
+                if (insertErr) {
+                    console.error('Error saving message to DB:', insertErr.message);
+                    return;
+                }
+
+                // **If saving is successful, THEN broadcast the message**
+                io.to(roomId).emit('chat-message', { username, message });
+            }
+        );
     });
+});
 
     socket.on('leave-room', ({ roomId, username }) => {
         socket.leave(roomId);
