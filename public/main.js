@@ -630,13 +630,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('chat-btn').addEventListener('click', toggleChat);
         document.getElementById('x-btn-chat').addEventListener('click', toggleClose);
 
-        //load messages periodically (if chat is visible)
-        setInterval(() => {
-            if (currentRoomId && document.getElementById('side-chat').style.display === 'block') {
-                loadMessages(currentRoomId);
-            }
-        }, 5000);
-
     } catch (error) {
         console.error("Initialization failed:", error);
         const messageBox = document.createElement('div');

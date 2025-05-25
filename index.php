@@ -83,7 +83,7 @@ if (isset($_SESSION['id'])) {
                                     style="width: 15px; height: auto; margin-right: 10px; pointer-events: none; ">
                             </button>
                             <div id="chat-messages-container">
-                                <div id="messages" aria-live="polite" aria-atomic="true"></div>
+                                <div id="messages" aria-atomic="true"></div>
                                 <input type="text" id="chat-input" placeholder="Type a message..." />
                                 <button id="send-btn">Send</button>
                             </div>
