@@ -186,32 +186,21 @@ io.on('connection', (socket) => {
         socket.leave(roomId);
         console.log(`${username} explicitly left room: ${roomId}`);
 
-        if (roomId && roomUserMap[roomId]) {
-            roomUserMap[roomId].delete(socket.id);
-
-            io.to(roomId).emit('user-left', { username });
-
-            // Check if the room is now empty after this user left
-            if (roomUserMap[roomId].size === 0) {
-                console.log(`Room ${roomId} is now empty. Initiating cleanup.`);
-                delete roomUserMap[roomId]; // Remove the room from the map
-
-                // Delete messages for the empty room
-                db.query('DELETE FROM messages WHERE room_id = ?', [roomId], (err) => {
-                    if (err) console.error(`Failed to delete messages for room ${roomId}:`, err.message);
-                    else console.log(`All messages for room ${roomId} deleted.`);
-                });
-
-                // Delete the room itself
-                db.query('DELETE FROM rooms WHERE id = ?', [roomId], (err) => {
-                    if (err) {
-                        console.error(`Failed to delete room ${roomId}:`, err.message);
-                    } else {
-                        console.log(`Room ${roomId} deleted.`);
-                        io.emit('leave-room', { roomId: roomId });
-                    }
-                });
+        if (roomUsers[roomId]) {
+            let leftAgoraUid = null;
+            for (const uid in roomUsers[roomId]) {
+                if (roomUsers[roomId][uid] === username) {
+                    leftAgoraUid = uid;
+                    delete roomUsers[roomId][uid];
+                    break;
+                }
             }
+            if (Object.keys(roomUsers[roomId]).length === 0) {
+                delete roomUsers[roomId]; // Clean up empty rooms
+            }
+
+            // Emit that the user left (with their Agora UID if known)
+            io.to(roomId).emit('user-left', { username: username, agoraUid: leftAgoraUid });
         }
     });
 
