@@ -137,23 +137,8 @@ io.on('connection', (socket) => {
         }
         roomUserMap[roomId].add(socket.id);
 
+        // Notify other users in the room that a new user joined
         socket.to(roomId).emit('user-joined', { username });
-        
-        const agoraUidForThisUser = someFunctionToGetAgoraUidForUser(username);
-
-        io.to(roomId).emit('user-joined', {
-            username: username,
-            agoraUid: agoraUidForThisUser
-        });
-    });
-    
-    socket.on('set-agora-uid', ({ roomId, username, agoraUid }) => {
-        if (roomUsers[roomId]) {
-            roomUsers[roomId][agoraUid] = username; 
-            console.log(`Stored Agora UID ${agoraUid} for ${username} in room ${roomId}`);
-
-            socket.to(roomId).emit('user-info-updated', { agoraUid: agoraUid, username: username });
-        }
     });
 
     socket.on('send-message', ({ roomId, username, message }) => {
@@ -186,21 +171,32 @@ io.on('connection', (socket) => {
         socket.leave(roomId);
         console.log(`${username} explicitly left room: ${roomId}`);
 
-        if (roomUsers[roomId]) {
-            let leftAgoraUid = null;
-            for (const uid in roomUsers[roomId]) {
-                if (roomUsers[roomId][uid] === username) {
-                    leftAgoraUid = uid;
-                    delete roomUsers[roomId][uid];
-                    break;
-                }
-            }
-            if (Object.keys(roomUsers[roomId]).length === 0) {
-                delete roomUsers[roomId]; // Clean up empty rooms
-            }
+        if (roomId && roomUserMap[roomId]) {
+            roomUserMap[roomId].delete(socket.id);
 
-            // Emit that the user left (with their Agora UID if known)
-            io.to(roomId).emit('user-left', { username: username, agoraUid: leftAgoraUid });
+            io.to(roomId).emit('user-left', { username });
+
+            // Check if the room is now empty after this user left
+            if (roomUserMap[roomId].size === 0) {
+                console.log(`Room ${roomId} is now empty. Initiating cleanup.`);
+                delete roomUserMap[roomId]; // Remove the room from the map
+
+                // Delete messages for the empty room
+                db.query('DELETE FROM messages WHERE room_id = ?', [roomId], (err) => {
+                    if (err) console.error(`Failed to delete messages for room ${roomId}:`, err.message);
+                    else console.log(`All messages for room ${roomId} deleted.`);
+                });
+
+                // Delete the room itself
+                db.query('DELETE FROM rooms WHERE id = ?', [roomId], (err) => {
+                    if (err) {
+                        console.error(`Failed to delete room ${roomId}:`, err.message);
+                    } else {
+                        console.log(`Room ${roomId} deleted.`);
+                        io.emit('leave-room', { roomId: roomId });
+                    }
+                });
+            }
         }
     });
 
