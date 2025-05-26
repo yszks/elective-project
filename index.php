@@ -32,6 +32,7 @@ if (isset($_SESSION['id'])) {
     <meta charset='utf-8'>
     <meta https-equiv='X-UA-Compatible' content='IE=edge'>
     <title>iBulong</title>
+    <link rel="icon" type="image/x-icon" href="public/assets/images/ib.ico">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='public/main.css'>
 </head>

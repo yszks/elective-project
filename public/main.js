@@ -615,13 +615,14 @@ let toggleCamera = async (e) => {
 };
 
 let toggleChat = async () => {
+    const chatSidebar = document.getElementById("side-chat");
+  
     document.getElementById('chat-cont').classList.toggle('show');
     document.getElementById('theme-toggle').classList.toggle('show');
     document.getElementById('container-chat-btn').classList.toggle('show');
 
     if (chatSidebar.classList.contains('show')) {
         chatSidebar.classList.remove('show');
-        themeToggle.classList.remove('show');
 
     } else {
         chatSidebar.classList.add('show');
