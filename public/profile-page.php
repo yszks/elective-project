@@ -1,13 +1,6 @@
 <?php
 session_start();
-// This path needs to be absolutely correct for your server
 require_once '/home/seupbvvg4y2j/config/config.php';
-
-// Temporarily enable error display for debugging (helpful for 500 errors)
-// REMEMBER TO REMOVE THESE 3 LINES WHEN YOU ARE DONE DEBUGGING!
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 if (!isset($_SESSION['id'])) {
     header("Location: login-page.php");
@@ -15,9 +8,8 @@ if (!isset($_SESSION['id'])) {
 }
 
 $id = $_SESSION['id'];
-$display_message = ''; // Unified variable for any message to be displayed
+$display_message = ''; 
 
-// --- STEP 1: FETCH USER DATA AT THE BEGINNING ---
 $stmt = $conn->prepare("SELECT username, email, password, user_img FROM users WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -28,11 +20,9 @@ if ($result->num_rows !== 1) {
     exit();
 }
 
-$user = $result->fetch_assoc(); // Fetch user data
-$stmt->close(); // Close the statement after fetching
+$user = $result->fetch_assoc(); 
+$stmt->close(); 
 
-
-// --- STEP 2: HANDLE USERNAME/EMAIL/PASSWORD UPDATES (POST REQUEST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_changes'])) {
 
     $currentUsername = $user['username'];
@@ -48,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_changes'])) {
     $updates = [];
     $params = [];
     $types = '';
-    $update_succeeded = false; // Flag to track if update actually happened
+    $update_succeeded = false; 
 
     // Update Username
     if (!empty($newUsername) && $newUsername !== $currentUsername) {
@@ -86,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_changes'])) {
         }
     }
 
-    // Update Password (only proceed if no error message already set)
     if (empty($display_message) && !empty($newPassword)) {
         if (empty($currentPasswordAttempt)) {
             $display_message = "Error: Please enter your current password to change it.";
@@ -98,13 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_changes'])) {
             $display_message = "Error: New password must be at least 8 characters long.";
         } else {
             $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-            $updates[] = "password = ?"; // Corrected to 'password'
+            $updates[] = "password = ?"; 
             $params[] = $hashedNewPassword;
             $types .= 's';
         }
     }
 
-    // Execute the update query if there are changes and no prior errors
     if (!empty($updates) && empty($display_message)) {
         $sql = "UPDATE users SET " . implode(", ", $updates) . " WHERE id = ?";
         $params[] = $id;
@@ -129,12 +117,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_changes'])) {
         $display_message = "No changes submitted.";
     }
 
-    // Set the session message for the redirect
     if (!empty($display_message)) {
         $_SESSION['profile_update_status'] = $display_message;
     }
 
-    // If update succeeded, re-fetch $user data for immediate display
     if ($update_succeeded) {
         $stmt_re_fetch = $conn->prepare("SELECT username, email, password, user_img FROM users WHERE id = ?");
         $stmt_re_fetch->bind_param("i", $id);
@@ -151,13 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_changes'])) {
 }
 
 
-// --- STEP 3: HANDLE IMAGE UPLOAD (Your existing working code) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
     $allowed = ['jpg', 'jpeg', 'png', 'webp'];
     $imageTmpPath = $_FILES['user_img']['tmp_name'];
     $imageName = basename($_FILES['user_img']['name']);
     $imageExtension = strtolower(pathinfo($imageName, PATHINFO_EXTENSION));
-    $image_update_message = ''; // Local message for image update
+    $image_update_message = ''; 
 
     if (in_array($imageExtension, $allowed)) {
         $newFileName = uniqid('user_', true) . '.' . $imageExtension;
@@ -170,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
             $stmt->bind_param("si", $newFileName, $id);
             if ($stmt->execute()) {
                 $image_update_message = "Profile picture updated successfully!";
-                $user['user_img'] = $newFileName; // Update $user variable
+                $user['user_img'] = $newFileName; 
             } else {
                 $image_update_message = "Database update failed.";
             }
@@ -182,24 +167,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['user_img'])) {
         $image_update_message = "Invalid file type. Allowed: JPG, JPEG, PNG, WEBP.";
     }
 
-    $_SESSION['profile_update_status'] = $image_update_message; // Use the same session var for simplicity
+    $_SESSION['profile_update_status'] = $image_update_message; 
     header("Location: profile-page.php");
     exit();
 }
 
-// --- STEP 4: RETRIEVE AND CLEAR SESSION MESSAGE FOR DISPLAY ---
-// This happens after redirects, at the top of the page load cycle.
 if (isset($_SESSION['profile_update_status'])) {
     $display_message = $_SESSION['profile_update_status'];
     unset($_SESSION['profile_update_status']);
 
-    // --- CRITICAL DEBUGGING LINE: CHECK YOUR BROWSER'S CONSOLE (F12) ---
-    // This will confirm if PHP is correctly passing the message to the client.
     echo '<script>console.log("PHP Session Message: ' . addslashes($display_message) . '");</script>';
 }
 
-
-// --- STEP 5: PREPARE IMAGE PATH FOR DISPLAY ---
 $imagePath = 'assets/uploads/' . (!empty($user['user_img']) ? $user['user_img'] : 'default.png');
 
 ?>
