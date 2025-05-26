@@ -348,33 +348,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function fetchUsername() {
     try {
-        // This is the crucial change: CALL YOUR PHP ENDPOINT!
-        const response = await fetch('/api/get-username.php', {
-            method: 'GET', // Or POST if your PHP expects POST, but GET is typical for fetching
+        // --- THIS IS THE CRUCIAL CHANGE ---
+        // Use PHP_API_BASE_URL to correctly target your PHP backend
+        const url = `${PHP_API_BASE_URL}/api/get-username.php`;
+
+        const response = await fetch(url, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                // Important: If your PHP login sets cookies, the browser will automatically send them
-                // as long as the PHP and Node.js domains are the same or properly configured.
             },
-            // 'credentials': 'include' is important if you're relying on cookies
-            // However, browsers usually send cookies automatically if same-origin or properly configured CORS
             credentials: 'include' // Make sure cookies are sent with the request
         });
 
-        // Check if the response was successful (HTTP status 200-299)
         if (!response.ok) {
-            // If the PHP returns 401 (Unauthorized) or another error, catch it here
-            const errorData = await response.json(); // Try to read the error message from PHP
+            const errorData = await response.json();
             console.error("Error from PHP backend:", errorData.error);
             throw new Error(`Failed to fetch user data from PHP: ${errorData.error || response.statusText}`);
         }
 
-        const userData = await response.json(); // Parse the JSON response
-        return userData; // This will return { username: '...' }
+        const userData = await response.json();
+        return userData;
     } catch (error) {
-        // Log the error for debugging
         console.error("fetchUsername() failed to fetch from PHP:", error);
-        // Re-throw the error so your main DOMContentLoaded catch block handles it
         throw error;
     }
 }
