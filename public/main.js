@@ -130,8 +130,6 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
                 }
             }
         }, 200);
-        
-        makeDraggable('stream-controls');
 
 
         // Display controls after joining a room (ensure this is done after Agora join is successful)
