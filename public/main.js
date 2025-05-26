@@ -347,13 +347,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function fetchUsername() {
-    const response = await fetch(`${PHP_API_BASE_URL}/public/get-username.php`, {
-        credentials: 'include'
-    });
-    if (!response.ok) {
-        throw new Error("Failed to fetch username");
+    try {
+        // This is the crucial change: CALL YOUR PHP ENDPOINT!
+        const response = await fetch('/api/get-username.php', {
+            method: 'GET', // Or POST if your PHP expects POST, but GET is typical for fetching
+            headers: {
+                'Content-Type': 'application/json',
+                // Important: If your PHP login sets cookies, the browser will automatically send them
+                // as long as the PHP and Node.js domains are the same or properly configured.
+            },
+            // 'credentials': 'include' is important if you're relying on cookies
+            // However, browsers usually send cookies automatically if same-origin or properly configured CORS
+            credentials: 'include' // Make sure cookies are sent with the request
+        });
+
+        // Check if the response was successful (HTTP status 200-299)
+        if (!response.ok) {
+            // If the PHP returns 401 (Unauthorized) or another error, catch it here
+            const errorData = await response.json(); // Try to read the error message from PHP
+            console.error("Error from PHP backend:", errorData.error);
+            throw new Error(`Failed to fetch user data from PHP: ${errorData.error || response.statusText}`);
+        }
+
+        const userData = await response.json(); // Parse the JSON response
+        return userData; // This will return { username: '...' }
+    } catch (error) {
+        // Log the error for debugging
+        console.error("fetchUsername() failed to fetch from PHP:", error);
+        // Re-throw the error so your main DOMContentLoaded catch block handles it
+        throw error;
     }
-    return await response.json();
 }
 
 
