@@ -117,7 +117,7 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
             clearInterval(window.localVoiceDetectionInterval);
         }
         window.localVoiceDetectionInterval = setInterval(() => {
-    
+
             if (localTracks.audioTrack && typeof localTracks.audioTrack.getVolumeLevel === 'function') {
                 const level = localTracks.audioTrack.getVolumeLevel(); // 0.0 - 1.0
                 const videoContainer = document.getElementById(`user-container-${UID}`);
@@ -130,6 +130,8 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
                 }
             }
         }, 200);
+        
+        makeDraggable('stream-controls');
 
 
         // Display controls after joining a room (ensure this is done after Agora join is successful)
@@ -139,14 +141,16 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         document.getElementById('logo-left').style.display = 'flex';
         document.getElementById('head-buttons').style.display = 'none';
         document.querySelector('.container-join-btn').style.display = 'none';
+        
+        
 
         // Load existing messages
         loadMessages(roomIdFromDatabase);
 
     } catch (error) {
         console.error("Agora join/publish error in joinAndDisplayLocalStream:", error);
-        if (UID !== null) { 
-            await leaveRoomAgoraAndSocket(); 
+        if (UID !== null) {
+            await leaveRoomAgoraAndSocket();
         }
         alert("Failed to join video call. Please try again.");
     }
@@ -155,16 +159,16 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
 function initializeUI() {
     const chatBtn = document.getElementById("chat-btn");
     const chatSidebar = document.getElementById("side-chat");
-    const closeChatBtn = document.getElementById("x-btn-chat");
+  
+    const toggleChatVisibility = () => {
+        if (chatSidebar) { 
+            chatSidebar.classList.toggle("show"); 
 
-    if (chatBtn && chatSidebar && closeChatBtn) {
-        chatBtn.addEventListener("click", () => {
-            chatSidebar.style.display = "block";
-        });
+        }
+    };
 
-        closeChatBtn.addEventListener("click", () => {
-            chatSidebar.style.display = "none";
-        });
+    if (chatBtn) { 
+        chatBtn.addEventListener("click", toggleChatVisibility);
     }
 
     const sendBtn = document.getElementById("send-btn");
@@ -218,7 +222,7 @@ function registerEventHandlers() {
     socket.on("disconnect", () => {
         console.log("Disconnected from Socket.IO server");
     });
-    
+
     socket.on("chat-message", (data) => {
         appendMessage(data.username, data.message);
     });
@@ -320,13 +324,11 @@ async function checkActiveRooms() {
 }
 
 
-// Call this function periodically or on page load
-setInterval(checkActiveRooms, 5000); // Check every 5 seconds
+setInterval(checkActiveRooms, 5000);
 
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Use API_BASE_URL for the fetch call
         const userData = await fetchUsername();
         username = userData.username;
 
@@ -408,7 +410,6 @@ async function createRoom() {
 async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
     console.log("Initiating leave room process...");
 
-    // Clear local voice detection interval if running
     if (window.localVoiceDetectionInterval) {
         clearInterval(window.localVoiceDetectionInterval);
         window.localVoiceDetectionInterval = null;
@@ -418,25 +419,24 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
     if (client && UID !== null) { // Check if client is initialized AND user has joined an Agora channel
         console.log("Leaving Agora channel...");
 
-        // Unpublish and close local tracks using properties
-        if (localTracks.audioTrack && typeof localTracks.audioTrack.close === 'function') { // Check if track is an object and has close method
-            if (micPublished) { // Only unpublish if it was actually published
+        if (localTracks.audioTrack && typeof localTracks.audioTrack.close === 'function') {
+            if (micPublished) {
                 await client.unpublish([localTracks.audioTrack]);
             }
-            localTracks.audioTrack.close(); // Close track to release resources
-            localTracks.audioTrack = null; // Set to null for garbage collection/re-creation check
+            localTracks.audioTrack.close();
+            localTracks.audioTrack = null;
             micPublished = false;
         }
-        if (localTracks.videoTrack && typeof localTracks.videoTrack.close === 'function') { // Check if track is an object and has close method
-            await client.unpublish([localTracks.videoTrack]); // Unpublish
-            localTracks.videoTrack.close(); // Close track to release resources
-            localTracks.videoTrack = null; // Set to null
+        if (localTracks.videoTrack && typeof localTracks.videoTrack.close === 'function') {
+            await client.unpublish([localTracks.videoTrack]);
+            localTracks.videoTrack.close();
+            localTracks.videoTrack = null;
         }
         await client.leave();
         console.log("Agora client left the channel.");
-        // Clear any UI elements for local stream
-        document.getElementById('video-streams').innerHTML = ''; // Clear all video players
-        UID = null; // Reset UID
+        document.getElementById('video-streams').innerHTML = '';
+        UID = null;
+
     } else {
         console.log("Agora client not active or not joined. Skipping Agora leave.");
     }
@@ -457,14 +457,13 @@ async function leaveRoomAgoraAndSocket(isErrorCleanup = false) {
 
     document.getElementById('messages').innerHTML = '';
     document.getElementById('chat-cont').style.display = 'none';
-    // document.getElementById('video-container').style.display = 'none'; // Assuming video-container is part of stream-controls or video-streams
     document.getElementById('stream-controls').style.display = 'none';
     document.getElementById('container-chat-btn').style.display = 'none';
-    document.getElementById('title').style.display = 'block'; // Show main title
-    document.getElementById('logo-left').style.display = 'none'; // Hide left logo
-    document.getElementById('head-buttons').style.display = 'flex'; // Show create/logout
-    document.querySelector('.container-join-btn').style.display = 'flex'; // Show join buttons
-    document.getElementById('side-chat').style.display = 'none'; // Hide chat sidebar
+    document.getElementById('title').style.display = 'block'; 
+    document.getElementById('logo-left').style.display = 'none';
+    document.getElementById('head-buttons').style.display = 'flex'; 
+    document.querySelector('.container-join-btn').style.display = 'flex';
+    document.getElementById('side-chat').style.display = 'none'; 
 }
 
 // === Chat Functions ===
@@ -479,26 +478,26 @@ function loadMessages(roomId) {
             const messagesContainer = document.getElementById("messages");
             messagesContainer.innerHTML = '';
             messages.forEach(msg => appendMessage(msg.username, msg.message));
-        
+
         })
         .catch(err => console.error("Error loading messages:", err));
 }
 
 function appendMessage(sender, message) {
     const messagesContainer = document.getElementById("messages");
-    
+
     const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 1;
-    
+
     const messageElement = document.createElement("div");
 
-    const messageBubble = document.createElement("span"); 
-    
+    const messageBubble = document.createElement("span");
+
 
     messageBubble.classList.add("chat-bubble");
 
-    if (sender === username) { 
+    if (sender === username) {
         messageBubble.textContent = `${message}`;
-        messageElement.classList.add("my-message-row"); 
+        messageElement.classList.add("my-message-row");
         messageBubble.classList.add("my-message-bubble");
     } else {
         messageBubble.textContent = `${sender}: ${message}`;
@@ -506,8 +505,8 @@ function appendMessage(sender, message) {
         messageBubble.classList.add("other-message-bubble");
     }
 
-    messageElement.appendChild(messageBubble); 
-    messagesContainer.appendChild(messageElement); 
+    messageElement.appendChild(messageBubble);
+    messagesContainer.appendChild(messageElement);
 
     if (isScrolledToBottom) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -517,15 +516,15 @@ function appendMessage(sender, message) {
 
 function systemMessage(msg) {
     const messagesContainer = document.getElementById("messages");
-    
+
     const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 1;
-    
-    const messageElement = document.createElement("div"); 
-    messageElement.classList.add("system-message"); 
-    messageElement.textContent = msg; 
+
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("system-message");
+    messageElement.textContent = msg;
 
     messagesContainer.appendChild(messageElement);
-    
+
     if (isScrolledToBottom) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
@@ -622,51 +621,52 @@ let toggleCamera = async (e) => {
 let toggleChat = async () => {
     document.getElementById('chat-cont').classList.toggle('show');
     document.getElementById('theme-toggle').classList.toggle('show');
-    document.getElementById('x-btn-chat').style.display = 'flex';
+    document.getElementById('container-chat-btn').classList.toggle('show');
+
+    if (chatSidebar.classList.contains('show')) {
+        chatSidebar.classList.remove('show');
+        themeToggle.classList.remove('show');
+
+    } else {
+        chatSidebar.classList.add('show');
+        themeToggle.classList.add('show');
+    }
 }
 
-let toggleClose = async () => {
-    document.getElementById('chat-cont').classList.remove('show');;
-    document.getElementById('theme-toggle').classList.remove('show');
-    document.getElementById('x-btn-chat').style.display = 'none';
-}
 
 
+    // === Event Listeners ===
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const userData = await fetchUsername();
+            username = userData.username;
+
+            initializeUI();
+            registerEventHandlers();
+            checkActiveRooms(); // Initial check for rooms
+            setInterval(checkActiveRooms, 5000); // Check every 5 seconds
+
+            // Add event listeners for control buttons
+            document.getElementById('leave-btn').addEventListener('click', leaveRoomAgoraAndSocket);
+            document.getElementById('mic-btn').addEventListener('click', toggleMic);
+            document.getElementById('camera-btn').addEventListener('click', toggleCamera);
+
+            document.getElementById('chat-btn').addEventListener('click', toggleChat);
 
 
-// === Event Listeners ===
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const userData = await fetchUsername();
-        username = userData.username;
-
-        initializeUI();
-        registerEventHandlers();
-        checkActiveRooms(); // Initial check for rooms
-        setInterval(checkActiveRooms, 5000); // Check every 5 seconds
-
-        // Add event listeners for control buttons
-        document.getElementById('leave-btn').addEventListener('click', leaveRoomAgoraAndSocket);
-        document.getElementById('mic-btn').addEventListener('click', toggleMic);
-        document.getElementById('camera-btn').addEventListener('click', toggleCamera);
-
-        document.getElementById('chat-btn').addEventListener('click', toggleChat);
-        document.getElementById('x-btn-chat').addEventListener('click', toggleClose);
-
-
-    } catch (error) {
-        console.error("Initialization failed:", error);
-        const messageBox = document.createElement('div');
-        messageBox.textContent = "Failed to fetch user data. Please log in again.";
-        messageBox.style.cssText = `
+        } catch (error) {
+            console.error("Initialization failed:", error);
+            const messageBox = document.createElement('div');
+            messageBox.textContent = "Failed to fetch user data. Please log in again.";
+            messageBox.style.cssText = `
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
             padding: 15px; border-radius: 5px; z-index: 1000;
         `;
-        document.body.appendChild(messageBox);
-        setTimeout(() => {
-            messageBox.remove();
-            window.location.href = "public/login-page.php";
-        }, 3000);
-    }
-});
+            document.body.appendChild(messageBox);
+            setTimeout(() => {
+                messageBox.remove();
+                window.location.href = "public/login-page.php";
+            }, 3000);
+        }
+    });

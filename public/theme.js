@@ -8,6 +8,7 @@ window.onload = () => {
     const toggleBtn = document.getElementById('theme-toggle');
     const sideChat = document.getElementById('side-chat');
     const registForm = document.getElementById('regist-form');
+    const scontrols = document.getElementById('stream-controls');
 
     // Apply theme on load
     if (savedTheme === 'light') {
@@ -18,10 +19,13 @@ window.onload = () => {
         if (toggleBtn) toggleBtn.style.backgroundColor = '#ffffff';
         if (sideChat) sideChat.style.backgroundColor = '#69a0f9';
         if (registForm) registForm.style.backgroundColor = '#69a0f9';
+        if (scontrols) scontrols.style.backgroundColor = '#69a0f9';
+        
     } else {
         if (toggleBtn) toggleBtn.style.backgroundColor = '#0C0C0C';
         if (sideChat) sideChat.style.backgroundColor = '#242424';
         if (registForm) registForm.style.backgroundColor = '#242424';  
+        if (scontrols) scontrols.style.backgroundColor = '#242424';
     }
 
     if (toggleBtn) {
@@ -37,6 +41,8 @@ window.onload = () => {
                 toggleBtn.style.backgroundColor = '#ffffff';
                 if (sideChat) sideChat.style.backgroundColor = '#69a0f9';
                 if (registForm) registForm.style.backgroundColor = '#69a0f9';
+                if (scontrols) scontrols.style.backgroundColor = '#69a0f9';
+                
             } else {
                 if (themeImage) themeImage.src = 'public/assets/images/roomzy-logo-dark.png';
                 if (themelogin) themelogin.src = 'assets/images/roomzy-logo-dark.png';
@@ -44,6 +50,7 @@ window.onload = () => {
                 toggleBtn.style.backgroundColor = '#0C0C0C';
                 if (sideChat) sideChat.style.backgroundColor = '#242424';
                 if (registForm) registForm.style.backgroundColor = '#242424';
+                if (scontrols) scontrols.style.backgroundColor = '#242424';
             }
 
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
