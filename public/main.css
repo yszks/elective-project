@@ -308,7 +308,7 @@ button {
 #chat-cont {
     flex-basis: 0;
     height: 100%;
-    transition: flex-basis 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
     z-index: 1000;
     pointer-events: none;
     overflow: hidden;
@@ -350,7 +350,7 @@ button {
     margin-top: 500px;
     height: 100vh;
     overflow-x: hidden;
-    width: 360px;
+    width: 380px;
     display: flex;
     flex-direction: column;
     padding: 5px;
@@ -372,8 +372,13 @@ button {
 .other-message-row{
     display: flex;
     justify-content: flex-start;
+}
 
-   
+.system-message{
+    display: flex;
+    justify-content: center;
+    font-size: 14px;
+    
 }
 
 
@@ -452,21 +457,26 @@ button {
     width: 100%;
     object-fit: cover;
     overflow: hidden;
+    position: relative;
+}
+
+.username-overlay{
+    font-family: 'zabal';
+    text-align: center;
+    position: absolute;
 }
 
 #stream-controls {
     display: none;
     position: fixed;
-    top: 5px;
-    transform: translateX(-50%);
+    top: 10px;
+    left: 270px;
     background-color: transparent;
     border-radius: 10px;
     padding: 5px;
     justify-content: center;
     align-items: center;
     z-index: 10001;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    border: 2px solid #003297;
 }
 
 @media screen and (min-width:300px) {

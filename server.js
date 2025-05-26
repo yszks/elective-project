@@ -137,8 +137,23 @@ io.on('connection', (socket) => {
         }
         roomUserMap[roomId].add(socket.id);
 
-        // Notify other users in the room that a new user joined
         socket.to(roomId).emit('user-joined', { username });
+        
+        const agoraUidForThisUser = someFunctionToGetAgoraUidForUser(username);
+
+        io.to(roomId).emit('user-joined', {
+            username: username,
+            agoraUid: agoraUidForThisUser
+        });
+    });
+    
+    socket.on('set-agora-uid', ({ roomId, username, agoraUid }) => {
+        if (roomUsers[roomId]) {
+            roomUsers[roomId][agoraUid] = username; 
+            console.log(`Stored Agora UID ${agoraUid} for ${username} in room ${roomId}`);
+
+            socket.to(roomId).emit('user-info-updated', { agoraUid: agoraUid, username: username });
+        }
     });
 
     socket.on('send-message', ({ roomId, username, message }) => {

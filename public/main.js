@@ -21,6 +21,8 @@ let TOKEN = null;
 let username = null;
 const socket = io(API_BASE_URL);
 
+const userUidToUsernameMap = {};
+
 
 client.on('user-published', handleUserJoined);
 client.on('user-left', handleUserLeft);
@@ -94,15 +96,18 @@ async function joinAndDisplayLocalStream(roomIdFromDatabase) {
         console.log("Local tracks created. Audio readyState:", localTracks.audioTrack.readyState, "Video readyState:", localTracks.videoTrack.readyState);
 
         // Join the channel - use the globally defined 'client'
-        UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); // Let Agora assign UID for new joins
+        UID = await client.join(APP_ID, agoraChannelName, TOKEN, null); 
         console.log(`Agora client joined channel: ${agoraChannelName} with UID: ${UID}`);
+        
+        socket.emit("set-agora-uid", { roomId: agoraChannelName, username: username, agoraUid: UID });
+        userUidToUsernameMap[UID] = username; 
 
         const localPlayerHtml = `<div class="video-container" id="user-container-${UID}">
                                     <div class="video-player local-video-player" id="user-${UID}"></div>
                                     <p class="username-overlay">${username}</p>
                                 </div>`;
-        document.getElementById('video-streams').innerHTML = localPlayerHtml; // Clear old and add new
-        localTracks.videoTrack.play(`user-${UID}`); // Play video track using the property
+        document.getElementById('video-streams').innerHTML = localPlayerHtml; 
+        localTracks.videoTrack.play(`user-${UID}`); 
         console.log("Local video track playing.");
 
         console.log("Attempting to publish video track.");
@@ -227,6 +232,10 @@ function registerEventHandlers() {
 
     socket.on("user-joined", (data) => {
         systemMessage(`${data.username} has joined the room.`);
+        
+        if (data.agoraUid && data.username) { 
+            userUidToUsernameMap[data.agoraUid] = data.username;
+        }
     });
 
     socket.on("user-left", (data) => {
@@ -243,18 +252,45 @@ function registerEventHandlers() {
 async function handleUserJoined(user, mediaType) {
     await client.subscribe(user, mediaType);
     console.log(`User ${user.uid} published ${mediaType}`);
+    
+    const remoteUsername = userUidToUsernameMap[user.uid] || `User ${user.uid}`
 
-    // If it's a new video stream, create a player for it
     if (mediaType === 'video') {
-        let player = document.getElementById(`user-container-${user.uid}`);
-        if (!player) { // Only add if container doesn't exist
-            // No 'local-video-player' class for remote users, so it won't be mirrored
-            player = `<div class="video-container" id="user-container-${user.uid}">
-                        <div class="video-player" id="user-${user.uid}"></div>
-                        <p class="username-overlay">${user.uid}</p>
-                    </div>`; // You might need a way to get remote username here
-            document.getElementById('video-streams').insertAdjacentHTML('beforeend', player);
+        let playerContainer = document.getElementById(`user-container-${user.uid}`);
+
+        if (!playerContainer) {
+            // Create the main video container div
+            playerContainer = document.createElement('div');
+            playerContainer.className = 'video-container';
+            playerContainer.id = `user-container-${user.uid}`;
+
+            // Create the div where the video stream will be played
+            const videoPlayerDiv = document.createElement('div');
+            videoPlayerDiv.className = 'video-player';
+            videoPlayerDiv.id = `user-${user.uid}`; // Agora will play into this ID
+
+            // Create the paragraph for the username overlay
+            const usernameOverlay = document.createElement('p');
+            usernameOverlay.className = 'username-overlay';
+            usernameOverlay.textContent = remoteUsername; // Set the actual username here!
+
+            // Append the video player and username overlay to the container
+            playerContainer.appendChild(videoPlayerDiv);
+            playerContainer.appendChild(usernameOverlay);
+
+            // Append the whole container to the 'video-streams' element
+            document.getElementById('video-streams').appendChild(playerContainer);
+
+        } else {
+            // If the container already exists (e.g., user re-published video),
+            // ensure the username is updated/correct in case it was unknown before.
+            const overlay = playerContainer.querySelector('.username-overlay');
+            if (overlay) {
+                overlay.textContent = remoteUsername;
+            }
         }
+        
+        // Play the video track into the designated player div
         user.videoTrack.play(`user-${user.uid}`);
     }
     // If it's an audio stream, play it
